@@ -1,0 +1,9 @@
+Desafio Técnico AI Engineer 2026/
+.agents/
+.claude/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+var/
