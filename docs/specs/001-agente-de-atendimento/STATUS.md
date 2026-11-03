@@ -1,11 +1,11 @@
 # STATUS 001 — Agente de atendimento
 
 **Estado:** em execução · **Atualizado em:** 2026-11-02
-**Progresso:** 8/31 tarefas · **Fase atual:** 1 — projeto, dados e regras da loja
-**Próximo passo:** T-09 (commit da Fase 1; o dono confirma a criação do repositório público).
+**Progresso:** 12/31 tarefas · **Fase atual:** 2 — manual consultável e encaminhamento
+**Próximo passo:** T-13 (commit e push da Fase 2); revisão adversarial da Fase 1 em andamento.
 **Bloqueios:** nenhum.
 **Aceite pendente:** —
-**Último estado verificado:** `Store` implementada; ruff limpo, 32 testes passando · 2026-11-02 23:25
+**Último estado verificado:** `62172c3` publicado em https://github.com/zerotohero3/artefact-challenge (público); ruff limpo, 32 testes passando · 2026-11-02 23:35
 
 ## Como retomar
 
@@ -35,8 +35,8 @@ do primeiro `run` (design §1). O provedor devolve 503 transitório com frequên
 | CA-05 | ✅ testado | `test_wrong_contact_looks_like_missing_order` (igualdade e ausência de 6 dados), `test_holder_contact_formats`, `test_phone_suffix_needs_eight_digits` | e-mail compartilhado entre clientes 11 e 43 (risco aceito) |
 | CA-06 | ⬜ | — | — |
 | CA-07 | ✅ testado | `test_order_total_is_the_recorded_one`, `test_shipped_order_past_estimate_is_late`, `test_cancelled_order_brings_the_reason` (relógio 2026-11-02) | outras datas de referência |
-| CA-08 | ⬜ | — | — |
-| CA-09 | ⬜ | — | — |
+| CA-08 | ✅ testado | `tests/test_policies.py` (6 testes); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10) | se o modelo consulta a seção certa (CA-11) |
+| CA-09 | ✅ testado | `tests/test_handoff.py`: linha gravada e protocolo devolvido; sem contato, erro e arquivo inexistente | concorrência (CLI de um usuário só); se o modelo encaminha quando deve (CA-13) |
 | CA-10 | ⬜ | — | — |
 | CA-11 | ⬜ | — | — |
 | CA-12 | ⬜ | — | — |

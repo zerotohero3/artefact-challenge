@@ -204,3 +204,39 @@ R$ 5.519,08; 429,90 → 5x 85,98; 439,20 → 5x 87,84; 11.499,00 → 12x 958,25)
 "violões" com teto de R$ 1.000 só entre disponíveis também dá 12. Escolhas locais: a busca devolve
 os itens empatados em preço por id; `days_since_estimated_delivery` e `estimated_delivery` vêm
 `null` quando não há previsão, para o formato do objeto não variar.
+
+**T-09 (23:35).** O dono confirmou a criação ("Pode criar e publicar"), depois de ver a lista de
+commits, o e-mail anônimo e a conferência de que nada proibido estava no índice (0 arquivos sob
+`.env`, `var/`, `.agents/` e a pasta do enunciado). `gh repo create zerotohero3/artefact-challenge
+--public --source . --remote origin --push`; `gh repo view --json visibility` → `PUBLIC`;
+`origin/main` = `62172c3`. Uma revisão adversarial da Fase 1, por agente sem a conversa, roda em
+paralelo à Fase 2; o que ela achar volta para cá.
+
+## 2026-11-02 — Execução, Fase 2
+
+**T-10.** `data/politicas_da_loja.md` escrito à mão a partir do `pdftotext -layout`: títulos
+`## N.` e `### N.N`, as quatro tabelas em Markdown, listas, e um preâmbulo (antes da seção 1, fora
+de qualquer seção) com as três correções de P-01. Cabeçalho e rodapé de página ("Empório da Música
+Manual de Políticas e Procedimentos", "Página N", o rodapé final) ficaram fora; capa e versão estão
+no topo. `grep -cE '^#{2,3} [0-9]' data/politicas_da_loja.md` → 28. Diff de palavras normalizadas
+(sem acento, sem pontuação) entre as seções e a extração, por script descartável: 1.631 palavras no
+PDF, 1.632 no Markdown, e só duas diferenças, ambas de P-01: "de r 100 00" → "conforme a secao 3 1"
+(tabela da seção 3) e "3321 4500" → "3341 4444" (seção 7). A correção do e-mail da 1.2 não aparece
+porque a diferença é só o acento, que a normalização apaga; ela está conferida pelo teste da CA-08.
+
+**T-11 — vermelho.** `tests/test_policies.py` (6 testes) e `tests/test_handoff.py` (3), contra
+esqueletos: 9 falhas. Uma era `FileNotFoundError` (o teste de acréscimo lia o arquivo antes de
+conferir algo); ganhou antes a asserção de protocolos distintos, que é parte do contrato. Segunda
+rodada: **9 falhas, todas `AssertionError`**, pelo motivo esperado.
+
+**T-12 — verde.** `src/emporio/policies.py` e `src/emporio/handoff.py`; 41 testes passando, ruff
+limpo. Seção pedida com subseções e seção inexistente juntas devolvem o texto das que existem e a
+lista das inexistentes no fim (o contrato só descrevia o caso inexistente sozinho).
+
+**Ajuste sem mudança de comportamento (CA-21).** A busca da CA-21 (`open\(|write_text|write_bytes`
+em `src`) acharia a leitura dos CSVs (`path.open(...)` na `Store`) e reprovaria o critério sem
+haver gravação. A leitura passou a `csv.DictReader(io.StringIO(path.read_text(...)))`; os CSVs só
+têm LF (`file data/*.csv`), e a carga completa da `Store` antes e depois é idêntica byte a byte
+(repr de produtos, categorias, clientes, pedidos e itens, 43.038 bytes, `cmp` sem diferença).
+`git grep` só olha arquivos rastreados: antes do commit, a busca precisa de `--untracked`; com ele,
+só `handoff.py` aparece.

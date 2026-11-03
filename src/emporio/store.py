@@ -1,4 +1,5 @@
 import csv
+import io
 import json
 import re
 import unicodedata
@@ -107,8 +108,7 @@ class Product:
 
 
 def read_csv(path: Path) -> list[dict]:
-    with path.open(encoding="utf-8", newline="") as file:
-        return list(csv.DictReader(file))
+    return list(csv.DictReader(io.StringIO(path.read_text(encoding="utf-8"))))
 
 
 def is_holder(customer: dict, contact: str) -> bool:

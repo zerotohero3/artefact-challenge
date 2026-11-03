@@ -83,7 +83,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   ⚠️ O total do pedido é o gravado; não some os itens. ⚠️ Status vale mais que estoque.
   → *Verificação:* T-07 verde; verificação completa com saída 0.
 
-- [ ] **T-09 · Commit da Fase 1 e primeiro push**
+- [x] **T-09 · Commit da Fase 1 e primeiro push**
   Confirmar com o dono e criar o repositório público `artefact-challenge` (spec §5) como remoto
   `origin`; publicar.
   → *Verificação:* `git log --oneline` mostra o commit da fase; `gh repo view --json visibility`
@@ -91,7 +91,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 2 — Manual consultável e encaminhamento
 
-- [ ] **T-10 · Manual curado**
+- [x] **T-10 · Manual curado**
   `data/politicas_da_loja.md`: conversão fiel do PDF com títulos `## N.` / `### N.N`, tabelas em
   Markdown e só as correções de P-01, listadas num preâmbulo antes da primeira seção. Na tabela da
   seção 3, a linha do cartão de crédito remete a parcela mínima à 3.1.
@@ -100,11 +100,11 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   extração `pdftotext` do PDF e só aponta as diferenças de P-01 e de formatação de tabela;
   resultado no LOG.
 
-- [ ] **T-11 · Testes de `Policies` e `HandoffLog` antes do código** (CA-08, CA-09)
+- [x] **T-11 · Testes de `Policies` e `HandoffLog` antes do código** (CA-08, CA-09)
   Saída: `tests/test_policies.py` e `tests/test_handoff.py`, com esqueletos.
   → *Verificação:* vermelho por asserção, anotado no LOG.
 
-- [ ] **T-12 · Implementar `Policies` e `HandoffLog`**
+- [x] **T-12 · Implementar `Policies` e `HandoffLog`**
   Arquivos: `src/emporio/policies.py`, `src/emporio/handoff.py` (D-03, D-08).
   ⚠️ Pedir a seção "1" não pode trazer a "10".
   → *Verificação:* T-11 verde; verificação completa com saída 0.
