@@ -338,3 +338,61 @@ real:
   instrumentos musicais", sem loja parceira.
 Design atualizado com a interface que a execução definiu (`load_deps`, `clock_from_env`,
 `Conversation.history`) e com o erro que a CLI captura.
+
+## 2026-11-02 — Execução, Fase 4
+
+**T-19, execução 01 (23:27–23:37), `gemini-3.1-flash-lite`: 18/18.** `uv run pytest evals -v`,
+10 min 29 s, gravada em `evidence/evals-01-gemini-3.1-flash-lite.txt`. Com `-v`, o pytest não
+mostra a saída dos casos aprovados, então as falhas de ambiente desta execução não ficaram
+visíveis; a partir da 02, as execuções usam `-rA`, que grava todas as conversas.
+
+**Execução 02 (23:38–23:42): 17/18.** Falhou `esgotado`: nas três buscas pelo Giannini GF-3D o
+modelo passou `only_available=True`, o produto (esgotado) não voltou, e a resposta foi "não
+encontrei o modelo giannini gf-3d no nosso catálogo". Uma falha de ambiente
+(`ModelUnavailableError`, repetida após 15 s). Gravada em `evidence/evals-02-...`.
+
+**Repetição do caso (RS-05), 3 vezes com `-k esgotado`:** 1 aprovação (a 2ª busca foi sem o
+filtro) e 2 falhas, ambas só com `only_available=True`. É defeito, não instabilidade. Gravadas em
+`evidence/evals-03-esgotado-rep{1,2,3}-...`.
+
+**Ajuste 1, motivado por `esgotado`:** a persona diz que, ao perguntarem por um produto
+específico, a busca é sem `only_available`, porque a resposta precisa do status; e a descrição do
+parâmetro avisa que o produto some do resultado se estiver esgotado, descontinuado ou em breve. A
+expectativa do caso não mudou. A mudança pode afetar todos os casos de catálogo: próxima é uma
+execução completa.
+
+**Leitura das respostas da execução 02 (23:50).** As expressões passam, mas a leitura completa
+achou dois erros que elas não pegam:
+- `pagamento`: o modelo parafraseou "sem valor mínimo de parcela (exceto abaixo de R$ 50,00)" do
+  §3.1 como "exceto **compras** abaixo de R$ 50,00"; na execução 04 escreveu só "Até 3x: sem valor
+  mínimo". As duas contradizem a P-01 (até 3x, parcela mínima de R$ 50,00). Os parcelamentos por
+  produto vêm do código e estão certos (os 12 da lista de violões conferidos à mão).
+- `seguimento-pedido` (e a fumaça da T-18): "acompanhe no site da Jadlog". O pedido não diz a
+  transportadora; o manual diz Correios ou Jadlog. Afirmação sem consulta (R-02).
+Os dois ficaram para depois da execução 04, para não trocar a persona no meio dela.
+
+## 2026-11-03 — Execução, Fase 4 (continuação)
+
+**Execução 04 (2026-11-02 23:44 – 2026-11-03 00:00): 16/18**, 15 min 41 s, com 3 falhas de
+ambiente (`ModelUnavailableError`, repetidas com sucesso). Gravada em `evidence/evals-04-...`.
+- `esgotado`: o ajuste 1 corrigiu a busca (a primeira consulta foi sem o filtro), mas a resposta só
+  listou alternativas disponíveis e não disse que o GF-3D está esgotado. Defeito do agente.
+- `endereco-horario`: a resposta foi "não abrimos aos domingos. Funcionamos de segunda a sexta,
+  das 09:00 às 18:00, e aos sábados, das 09:00 às 13:00", correta, e o caso exige "fechad".
+  **O caso está errado:** reprova um agente correto. Antes de mudar: a expressão passa a aceitar a
+  negação (`fechad|nao (abr|funcion)`), e continua reprovando "abrimos no domingo" ou qualquer
+  resposta sem negação. Design §4 atualizado com a data e o motivo.
+
+**Ajuste 2, motivado por `esgotado`:** a persona manda responder primeiro sobre o produto pedido,
+dizendo a disponibilidade dele, e só depois sugerir alternativas.
+
+**Ajuste 3, motivado por `seguimento-pedido` (leitura da execução 02):** a persona manda citar
+Correios e Jadlog no rastreio, porque o pedido não diz a transportadora.
+
+**Manual, regra de 3x (motivada por `pagamento`, leituras das execuções 02 e 04):** a P-01 aprovada
+diz "até 3x, parcela mínima de R$ 50,00", mas o manual curado tinha mantido a frase ambígua do
+PDF, que o modelo parafraseia errado. A linha da 3.1 passou a dizer "parcela mínima de R$ 50,00",
+e o preâmbulo lista essa quarta correção. Teste novo em `test_policies.py`, vermelho antes da
+mudança. Diff de palavras contra o `pdftotext`: só as correções de P-01 (seção 3, seção 3.1 e
+seção 7). É aplicação da P-01, não premissa nova, e fica destacada no relatório para o dono.
+Suíte: 57 testes, ruff limpo. Próxima: execução completa 05.

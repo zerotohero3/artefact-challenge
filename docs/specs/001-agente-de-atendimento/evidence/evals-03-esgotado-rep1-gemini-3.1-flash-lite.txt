@@ -1,0 +1,30 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /home/zerotohero/Downloads/artefact-challenge/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zerotohero/Downloads/artefact-challenge
+configfile: pyproject.toml
+plugins: anyio-4.16.0
+collecting ... collected 18 items / 17 deselected / 1 selected
+
+evals/test_evals.py::test_case[CA-10-esgotado] PASSED                    [100%]
+
+=============================== warnings summary ===============================
+evals/test_evals.py::test_case[CA-10-esgotado]
+  /home/zerotohero/Downloads/artefact-challenge/.venv/lib/python3.12/site-packages/pydantic_graph/_utils.py:67: DeprecationWarning: There is no current event loop
+    event_loop = asyncio.get_event_loop()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+__________________________ test_case[CA-10-esgotado] ___________________________
+----------------------------- Captured stdout call -----------------------------
+
+Cliente: Vocês têm o violão Giannini GF-3D?
+Assistente: Olá! Eu sou a assistente virtual da Empório da Música.
+
+Sobre o violão Giannini GF-3D, ele está esgotado no momento.
+
+Como ele é um modelo dreadnought, posso te ajudar a encontrar outros violões parecidos da categoria "Violões" que temos disponíveis agora, se quiser. Quer que eu busque algumas opções para você?
+Consultas: [('search_products', {'query': 'Giannini GF-3D', 'only_available': True}), ('search_products', {'query': 'Giannini GF-3D'})]
+=========================== short test summary info ============================
+PASSED evals/test_evals.py::test_case[CA-10-esgotado]
+================= 1 passed, 17 deselected, 1 warning in 13.39s =================

@@ -55,3 +55,5 @@ def test_curated_contacts_and_installment_rule(policies):
     assert "| Cartão de Crédito | Até 12x sem juros | Parcela mínima conforme a seção 3.1 |" in (
         policies.read(["3"])
     )
+    three_times = "Parcelamento em até 3x: sem juros, parcela mínima de R$ 50,00."
+    assert three_times in policies.read(["3.1"])

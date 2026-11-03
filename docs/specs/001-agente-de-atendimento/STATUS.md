@@ -1,15 +1,16 @@
 # STATUS 001 — Agente de atendimento
 
-**Estado:** em execução · **Atualizado em:** 2026-11-02
+**Estado:** em execução · **Atualizado em:** 2026-11-03
 **Progresso:** 18/31 tarefas · **Fase atual:** 4 — avaliação, modelo e exemplos
-**Próximo passo:** T-19 (primeira execução completa da avaliação, gravada em `evidence/`).
+**Próximo passo:** T-19 — execução completa 05 em andamento (depois dos ajustes 2 e 3); faltam duas completas seguidas sem falha.
 **Bloqueios:** nenhum.
 **Aceite pendente:** —
-**Último estado verificado:** Fase 3 pronta (agente, persona, CLI; fumaça com o modelo real ok); ruff limpo, 57 testes passando · 2026-11-02 23:27
+**Último estado verificado:** `1518447` publicado; depois dele, ajustes de persona, do caso `endereco-horario` e da regra de 3x no manual (não commitados); ruff limpo, 57 testes passando · 2026-11-03 00:02
 
 ## Como retomar
 
-Fases 0 a 3 feitas (LOG, 2026-11-02). Modelo padrão: `google:gemini-3.1-flash-lite`. A avaliação
+Fases 0 a 3 feitas (LOG, 2026-11-02). Avaliação até agora: 01 18/18, 02 17/18, 03 (repetições de
+`esgotado`) 1/3, 04 16/18; cada falha e cada ajuste estão no LOG. Modelo padrão: `google:gemini-3.1-flash-lite`. A avaliação
 roda com `uv run pytest evals -v` e cada execução vai para
 `evidence/evals-NN-<modelo>.txt` (a `evals-00-esqueleto-...` é o vermelho da T-15 e não conta).
 Falha transitória do provedor é repetida pelo executor e impressa como "falha de ambiente". Estado

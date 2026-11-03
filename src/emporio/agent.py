@@ -93,7 +93,9 @@ def build_agent(model: str | Model | None = None) -> Agent[Deps, str]:
             category: nome exato de uma categoria do catálogo, por exemplo "Violões".
             min_price: preço final mínimo, em reais.
             max_price: preço final máximo, em reais.
-            only_available: verdadeiro para trazer só produtos disponíveis para compra.
+            only_available: verdadeiro para trazer só produtos disponíveis para compra. Não use
+                ao procurar um produto específico: ele some do resultado se estiver esgotado,
+                descontinuado ou em breve.
         """
         return ctx.deps.store.search_products(query, category, min_price, max_price, only_available)
 

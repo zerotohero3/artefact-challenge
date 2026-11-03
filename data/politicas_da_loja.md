@@ -13,6 +13,8 @@ contato@emporiodamusica.com.br
 >   para `contato@emporiodamusica.com.br`, como na capa.
 > - Seção 3: a tabela dizia "Parcela mínima de R$ 100,00" para o cartão de crédito, enquanto a
 >   seção 3.1 tem faixas por número de parcelas; a tabela passou a remeter à seção 3.1.
+> - Seção 3.1: "sem valor mínimo de parcela (exceto abaixo de R$ 50,00)" foi reescrito como
+>   "parcela mínima de R$ 50,00", que é o que a frase quer dizer e o padrão das outras faixas.
 > - Seção 7: o WhatsApp `(67) 3321-4500` foi corrigido para `(67) 3341-4444`, como na capa e na
 >   seção 1.2.
 
@@ -74,7 +76,7 @@ Aceitamos as seguintes formas de pagamento para compras presenciais e online:
 
 ### 3.1 Regras de Parcelamento
 
-- Parcelamento em até 3x: sem juros, sem valor mínimo de parcela (exceto abaixo de R$ 50,00).
+- Parcelamento em até 3x: sem juros, parcela mínima de R$ 50,00.
 - Parcelamento de 4x a 6x: sem juros, parcela mínima de R$ 80,00.
 - Parcelamento de 7x a 12x: sem juros, parcela mínima de R$ 100,00.
 - Combinação de formas de pagamento: permitida (ex.: PIX + cartão) para compras acima de

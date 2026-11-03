@@ -1,0 +1,73 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /home/zerotohero/Downloads/artefact-challenge/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zerotohero/Downloads/artefact-challenge
+configfile: pyproject.toml
+plugins: anyio-4.16.0
+collecting ... collected 18 items / 17 deselected / 1 selected
+
+evals/test_evals.py::test_case[CA-10-esgotado] FAILED                    [100%]
+
+=================================== FAILURES ===================================
+__________________________ test_case[CA-10-esgotado] ___________________________
+
+case = Case(name='esgotado', group='CA-10', messages=['Vocês têm o violão Giannini GF-3D?'], calls={'search_products': 2}, no...False, now=datetime.datetime(2026, 11, 3, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=72000))))
+tmp_path = PosixPath('/tmp/pytest-of-zerotohero/pytest-21/test_case_CA_10_esgotado_0')
+
+    @pytest.mark.parametrize("case", CASES, ids=lambda case: f"{case.group}-{case.name}")
+    def test_case(case: Case, tmp_path):
+        handoffs = tmp_path / "handoffs.jsonl"
+        conversation = Conversation(build_agent(), load_deps(lambda: case.now, handoffs))
+        replies = []
+        for message in case.messages:
+            print(f"\nCliente: {message}")
+            replies.append(send(conversation, message))
+            print(f"Assistente: {replies[-1]}")
+        calls = [
+            (part.tool_name, part.args_as_dict())
+            for message in conversation.history
+            for part in message.parts
+            if isinstance(part, ToolCallPart)
+        ]
+        print(f"Consultas: {calls}")
+    
+        texts = [normalize(reply) for reply in replies]
+        for tool, minimum in case.calls.items():
+            assert sum(name == tool for name, _ in calls) >= minimum, f"{tool} ×{minimum}"
+        if case.no_calls:
+            assert calls == []
+        if case.args:
+            assert case.args(calls), case.args.__name__
+        for pattern in case.contains:
+>           assert re.search(pattern, texts[-1]), f"falta: {pattern}"
+E           AssertionError: falta: esgotad|indisponiv|sem estoque|em falta
+E           assert None
+E            +  where None = <function search at 0x7af46b105da0>('esgotad|indisponiv|sem estoque|em falta', 'ola! eu sou a assistente virtual da emporio da musica.\n\nnao encontrei o modelo giannini gf-3d no nosso catalogo. se quiser, tenho outros modelos da marca disponiveis:\n\n*   **giannini gf-1r aco folk sunburst:** r$ 579,90 (ou r$ 550,91 no pix), em ate 6x de r$ 96,65.\n*   **giannini gn-15 nylon cedro natural:** r$ 689,00 (ou r$ 654,55 no pix), em ate 6x de r$ 114,83.\n*   **giannini gnf-3 ceq eletrico nylon natural:** r$ 1.049,00 (ou r$ 996,55 no pix), em ate 10x de r$ 104,90.\n*   **giannini gwne-7 7 cordas nylon natural:** r$ 1.149,00 (ou r$ 1.091,55 no pix), em ate 11x de r$ 104,45.\n\nalgum desses te interessa ou gostaria que eu verificasse algo diferente?')
+E            +    where <function search at 0x7af46b105da0> = re.search
+
+evals/test_evals.py:61: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+Cliente: Vocês têm o violão Giannini GF-3D?
+[falha de ambiente: ModelUnavailableError; nova tentativa em 15s]
+[falha de ambiente: ModelUnavailableError; nova tentativa em 30s]
+Assistente: Olá! Eu sou a assistente virtual da Empório da Música.
+
+Não encontrei o modelo Giannini GF-3D no nosso catálogo. Se quiser, tenho outros modelos da marca disponíveis:
+
+*   **Giannini GF-1R Aço Folk Sunburst:** R$ 579,90 (ou R$ 550,91 no PIX), em até 6x de R$ 96,65.
+*   **Giannini GN-15 Nylon Cedro Natural:** R$ 689,00 (ou R$ 654,55 no PIX), em até 6x de R$ 114,83.
+*   **Giannini GNF-3 CEQ Elétrico Nylon Natural:** R$ 1.049,00 (ou R$ 996,55 no PIX), em até 10x de R$ 104,90.
+*   **Giannini GWNE-7 7 Cordas Nylon Natural:** R$ 1.149,00 (ou R$ 1.091,55 no PIX), em até 11x de R$ 104,45.
+
+Algum desses te interessa ou gostaria que eu verificasse algo diferente?
+Consultas: [('search_products', {'query': 'Giannini GF-3D', 'only_available': True}), ('search_products', {'only_available': True, 'query': 'Giannini violão'})]
+=============================== warnings summary ===============================
+evals/test_evals.py::test_case[CA-10-esgotado]
+  /home/zerotohero/Downloads/artefact-challenge/.venv/lib/python3.12/site-packages/pydantic_graph/_utils.py:67: DeprecationWarning: There is no current event loop
+    event_loop = asyncio.get_event_loop()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED evals/test_evals.py::test_case[CA-10-esgotado] - AssertionError: falta...
+================= 1 failed, 17 deselected, 1 warning in 56.14s =================

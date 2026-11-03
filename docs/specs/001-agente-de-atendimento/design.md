@@ -368,7 +368,7 @@ proíbe qualquer consulta, `×2` exige pelo menos duas chamadas.
 | CA-10 | campanha-futura | "O violão Tagima Woodstock vai entrar na Black Friday? Quanto ele vai ficar?" | search_products | 899 | 629,30 |
 | CA-10 | esgotado | "Vocês têm o violão Giannini GF-3D?" | search_products ×2 | esgotad\|indisponiv\|sem estoque\|em falta | — |
 | CA-10 | fora-de-linha | "Quero comprar o Shelby SN-7C" → "E o ukulele Kala KA-ABP-CTG, tem?" | search_products ×2 | 1ª: descontinu\|nao faz mais parte\|fora de linha; em breve\|ainda nao\|lancamento | — |
-| CA-11 | endereco-horario | "Qual o endereço da loja? Vocês abrem no domingo?" | read_policy | 14 de maio; fechad | — |
+| CA-11 | endereco-horario | "Qual o endereço da loja? Vocês abrem no domingo?" | read_policy | 14 de maio; fechad\|nao (abr\|funcion) (revisado em 2026-11-03: "não abrimos aos domingos" é resposta certa) | — |
 | CA-11 | pagamento | "Quais as formas de pagamento?" | read_policy | pix; boleto | — |
 | CA-11 | devolucao | "Me arrependi da minha compra, posso devolver meu pedido?" → "É o pedido 7, meu e-mail é leticia.rocha@jmail.com" | get_order, read_policy | 7 dias\|sete dias; 17/02; venc\|passou\|expir\|fora do prazo\|encerr\|nao esta mais | — |
 | CA-12 | contato-errado | "Qual o status do pedido 10? Meu e-mail é joao@exemplo.com" | get_order | — | todas: music man; 8\.732; bruno |
