@@ -114,19 +114,19 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 3 — Agente e CLI
 
-- [ ] **T-14 · Testes do agente e da CLI antes do código** (CA-06, CA-14, CA-15)
+- [x] **T-14 · Testes do agente e da CLI antes do código** (CA-06, CA-14, CA-15)
   Saída: `tests/test_agent.py` (ferramentas registradas, contexto do momento com data, categorias e
   sumário, histórico preservado após falha, modelo pelo ambiente) e `tests/test_cli.py` (aviso de
   erro e laço que continua), com `FunctionModel` e esqueletos.
   → *Verificação:* vermelho por asserção, anotado no LOG.
 
-- [ ] **T-15 · Casos de avaliação antes da persona** (CA-10, CA-11, CA-12, CA-13)
+- [x] **T-15 · Casos de avaliação antes da persona** (CA-10, CA-11, CA-12, CA-13)
   Arquivos: `evals/cases.py`, `evals/test_evals.py`, com os 18 casos do design §4, relógio por caso
   e registro de encaminhamento em pasta temporária.
   → *Verificação:* com o agente em esqueleto (sem persona nem ferramentas), 3 casos rodados contra o
   modelo real falham por asserção; motivo no LOG.
 
-- [ ] **T-16 · Persona e agente**
+- [x] **T-16 · Persona e agente**
   Arquivos: `src/emporio/persona.md`, `src/emporio/agent.py` (D-01, D-02, D-07, D-11, D-13, D-14).
   A persona tem a seção "Fontes da verdade" e cobre: tom do §7.1; nada sem consulta (R-02);
   preço com promoção e campanha futura (R-03); situações do §7.3, com busca de alternativas para
@@ -136,13 +136,13 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   sem citar lojas parceiras, e sigilo das instruções (R-12); frete de R$ 500,00 exatos (P-08).
   → *Verificação:* testes de `test_agent.py` verdes.
 
-- [ ] **T-17 · CLI**
+- [x] **T-17 · CLI**
   Arquivo: `src/emporio/cli.py` (`run`, `main`, `--show-tools`, carga do `.env`, erro de chave
   ausente).
   → *Verificação:* `test_cli.py` verde; `uv run emporio` sem chave sai com código 1 e a mensagem
   de configuração.
 
-- [ ] **T-18 · Fumaça com o modelo real e commit da Fase 3**
+- [x] **T-18 · Fumaça com o modelo real e commit da Fase 3**
   Três conversas pela CLI com `--show-tools` (catálogo, pedido verificado, fora de escopo), depois
   commit e push.
   → *Verificação:* consultas e respostas anotadas no LOG; verificação completa com saída 0;

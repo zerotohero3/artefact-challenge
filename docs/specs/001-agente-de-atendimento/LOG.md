@@ -205,7 +205,7 @@ R$ 5.519,08; 429,90 → 5x 85,98; 439,20 → 5x 87,84; 11.499,00 → 12x 958,25)
 os itens empatados em preço por id; `days_since_estimated_delivery` e `estimated_delivery` vêm
 `null` quando não há previsão, para o formato do objeto não variar.
 
-**T-09 (23:35).** O dono confirmou a criação ("Pode criar e publicar"), depois de ver a lista de
+**T-09 (23:09, logo depois do commit das 23:08).** O dono confirmou a criação ("Pode criar e publicar"), depois de ver a lista de
 commits, o e-mail anônimo e a conferência de que nada proibido estava no índice (0 arquivos sob
 `.env`, `var/`, `.agents/` e a pasta do enunciado). `gh repo create zerotohero3/artefact-challenge
 --public --source . --remote origin --push`; `gh repo view --json visibility` → `PUBLIC`;
@@ -241,7 +241,7 @@ têm LF (`file data/*.csv`), e a carga completa da `Store` antes e depois é id�
 `git grep` só olha arquivos rastreados: antes do commit, a busca precisa de `--untracked`; com ele,
 só `handoff.py` aparece.
 
-## 2026-11-03 — Revisão adversarial da Fase 1
+## 2026-11-02 — Revisão adversarial da Fase 1
 
 Um agente sem a conversa revisou o commit `62172c3` contra a spec, com mutações do código numa
 cópia exportada do commit. Cada achado foi reproduzido aqui antes de virar mudança:
@@ -278,3 +278,63 @@ de 20) reprova exatamente um teste além do de pontuação, que ainda estava ver
 correção: 45 testes passando, ruff limpo. A lista de marcas da D-17 continua sem teste contra
 marcas que não são de instrumento ("Aquila", "LR Baggs"); o teste da CA-20 confere os 9 produtos
 da faixa e o comando do T-08 confirmou que só 6 dos 65 perdem a descrição.
+
+## 2026-11-02 — Execução, Fase 3
+
+**T-14 — vermelho.** `tests/conftest.py` (bloqueia requisição real ao modelo), `tests/test_agent.py`
+(8 testes: as 4 ferramentas exatas, persona e contexto do momento nas instruções, consultas
+relatadas no turno, relógio da conversa na consulta de pedido e no encaminhamento, histórico
+preservado após falha, modelo pelo ambiente, relógio fixável pelo ambiente) e `tests/test_cli.py`
+(4: aviso de erro e laço que continua, consultas só com a opção, `sair`, chave ausente), com
+`FunctionModel` e esqueletos de `agent.py` e `cli.py`. Primeira rodada: 11 falhas e 1 aprovação
+vazia (`sair` passava porque o esqueleto não lia nada); o teste passou a exigir que a mensagem antes
+do `sair` seja enviada e a de depois não. Segunda rodada: **12 falhas, todas de asserção** (a da
+chave ausente como "DID NOT RAISE SystemExit"). Suíte inteira: 12 falhas, 45 aprovações.
+
+**Correção de horários (23:24).** As entradas da T-09 ("23:35") e os títulos "2026-11-03" da
+revisão da Fase 1 e da Fase 3 foram escritos com horário estimado, não medido; o `date` mostrou
+2026-11-02 23:23. Corrigidos pelos horários dos commits (`git log --date`): `62172c3` às 23:08,
+`14f5a8f` às 23:16, `bd1f39c` às 23:19. O STATUS do `bd1f39c` dizia "2026-11-03 00:15" pelo mesmo
+erro. Daqui em diante, horário no LOG e no STATUS só vem de `date`.
+
+**Plumbing antes da T-16 (ordem alterada).** A verificação da T-15 pede o agente em esqueleto
+falando com o modelo real, o que exige `Conversation`, `model_name_from_env` e `clock_from_env`
+reais. Esses três foram implementados antes da persona e das ferramentas; os testes deles
+(histórico após falha, modelo e relógio pelo ambiente), vermelhos na T-14, passaram. A
+`Conversation` expõe `history` (a avaliação lê as chamadas estruturadas dali), o que o design não
+listava na interface.
+
+**T-15 — vermelho com o modelo real (23:23).** `evals/cases.py` (os 18 casos do design §4) e
+`evals/test_evals.py` (relógio por caso, encaminhamento em pasta temporária, falha transitória do
+provedor repetida com espera de 15, 30 e 60 s e impressa como falha de ambiente). Com o agente sem
+persona nem ferramentas, `preco-gd20`, `pagamento` e `reclamacao` contra o
+`gemini-3.1-flash-lite`: **3 falhas por asserção**, pelo motivo esperado ("search_products ×1",
+"read_policy ×1", "handoff_to_staff ×1": sem ferramenta, nada é consultado). Gravado em
+`evidence/evals-00-esqueleto-gemini-3.1-flash-lite.txt`; não conta como execução da avaliação.
+
+**T-16 — verde.** `src/emporio/persona.md` (com a seção "Fontes da verdade") e o agente completo:
+persona como instrução estática, contexto do momento como instrução dinâmica (dia da semana, data e
+hora em Campo Grande, categorias, sumário do manual) e as 4 ferramentas. As descrições das
+ferramentas e dos parâmetros saem das docstrings, em português porque o modelo as lê junto com a
+persona; conferido por `FunctionModel` que chegam ao modelo (descrição e cada parâmetro). Os 8
+testes de `test_agent.py` passam.
+
+**T-17 — verde.** `src/emporio/cli.py`. A CLI captura `AgentRunError`, a base das falhas do modelo
+no PydanticAI 2.65 (HTTP, 503, 429, cota, conexão, tempo esgotado); outro erro é defeito e
+interrompe. Os 4 testes de `test_cli.py` passam; suíte completa: 57 testes, ruff limpo. Sem chave,
+numa pasta sem `.env`: `uv run emporio` imprime "Falta a chave do Google AI Studio: copie
+.env.example para .env e preencha GOOGLE_API_KEY (...)" e sai com 1.
+
+**T-18 — fumaça com o modelo real (23:26).** Três conversas pela CLI com `--show-tools` e o relógio
+real:
+- "Quais violões até R$ 1.000 vocês têm disponíveis?" →
+  `search_products(category='Violões', max_price=1000, only_available=True)` → os 12 do CA-04 em
+  ordem, com preço e PIX. O modelo escreveu "GN-15 Nylon Cedro" onde o nome no catálogo é "Cedr".
+- "Cadê meu pedido 8? Meu e-mail é anacarol.ferreira@coldmail.com" →
+  `get_order(order_id=8, contact='anacarol.ferreira@coldmail.com')` → "enviado", previsão
+  28/02/2026, atrasado, desculpas, código BRJL5544332BR e oferta de encaminhamento. Disse "pelo site
+  da Jadlog"; o manual diz Correios ou Jadlog.
+- "Vocês vendem pedal de guitarra?" → nenhuma consulta; "trabalhamos exclusivamente com
+  instrumentos musicais", sem loja parceira.
+Design atualizado com a interface que a execução definiu (`load_deps`, `clock_from_env`,
+`Conversation.history`) e com o erro que a CLI captura.

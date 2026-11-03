@@ -324,8 +324,10 @@ class HandoffLog:       # src/emporio/handoff.py
 class Deps:             # src/emporio/agent.py
     store: Store; policies: Policies; handoffs: HandoffLog; now: Callable[[], datetime]
 
+def load_deps(now=None, handoff_path=ROOT / "var" / "handoffs.jsonl") -> Deps: ...
 def build_agent(model: str | Model | None = None) -> Agent[Deps, str]: ...
 def model_name_from_env() -> str: ...
+def clock_from_env() -> Callable[[], datetime]: ...  # EMPORIO_NOW ou relógio real
 
 @dataclass
 class Turn:
@@ -333,6 +335,7 @@ class Turn:
     tool_calls: list[str]   # "search_products(query='Takamine GD20')"
 
 class Conversation:
+    history: list[ModelMessage]  # a avaliação lê daqui as chamadas com argumentos
     def __init__(self, agent, deps): ...
     def send(self, message: str) -> Turn: ...
 
@@ -344,8 +347,10 @@ def main() -> None: ...  # entrada `emporio`
 
 `uv run emporio [--show-tools]`. Sai com `sair`, Ctrl-D ou Ctrl-C. Sem `GOOGLE_API_KEY` com
 modelo Google: mensagem dizendo como configurar e saída com código 1. Erro do modelo durante a
-conversa: `"Não consegui responder agora (<tipo do erro>). Tente de novo em instantes."`, e a
-conversa continua.
+conversa (`AgentRunError` do PydanticAI, que cobre HTTP, indisponibilidade, limite de uso e
+conexão): `"Não consegui responder agora (<tipo do erro>). Tente de novo em instantes."`, e a
+conversa continua. Erro de outro tipo é defeito do código e interrompe. A CLI desliga o banner do
+PydanticAI (`BANNER_ENABLED = False`) antes da primeira execução.
 
 ### Casos de avaliação
 

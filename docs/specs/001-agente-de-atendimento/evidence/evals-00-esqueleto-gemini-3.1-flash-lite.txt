@@ -1,0 +1,191 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /home/zerotohero/Downloads/artefact-challenge/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zerotohero/Downloads/artefact-challenge
+configfile: pyproject.toml
+plugins: anyio-4.16.0
+collecting ... collected 18 items / 15 deselected / 3 selected
+
+evals/test_evals.py::test_case[CA-10-preco-gd20] FAILED                  [ 33%]
+evals/test_evals.py::test_case[CA-11-pagamento] FAILED                   [ 66%]
+evals/test_evals.py::test_case[CA-13-reclamacao] FAILED                  [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_case[CA-10-preco-gd20] __________________________
+
+case = Case(name='preco-gd20', group='CA-10', messages=['Quanto custa o Takamine GD20?'], calls={'search_products': 1}, no_ca...False, now=datetime.datetime(2026, 11, 3, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=72000))))
+tmp_path = PosixPath('/tmp/pytest-of-zerotohero/pytest-12/test_case_CA_10_preco_gd20_0')
+
+    @pytest.mark.parametrize("case", CASES, ids=lambda case: f"{case.group}-{case.name}")
+    def test_case(case: Case, tmp_path):
+        handoffs = tmp_path / "handoffs.jsonl"
+        conversation = Conversation(build_agent(), load_deps(lambda: case.now, handoffs))
+        replies = []
+        for message in case.messages:
+            print(f"\nCliente: {message}")
+            replies.append(send(conversation, message))
+            print(f"Assistente: {replies[-1]}")
+        calls = [
+            (part.tool_name, part.args_as_dict())
+            for message in conversation.history
+            for part in message.parts
+            if isinstance(part, ToolCallPart)
+        ]
+        print(f"Consultas: {calls}")
+    
+        texts = [normalize(reply) for reply in replies]
+        for tool, minimum in case.calls.items():
+>           assert sum(name == tool for name, _ in calls) >= minimum, f"{tool} ×{minimum}"
+E           AssertionError: search_products ×1
+E           assert 0 >= 1
+E            +  where 0 = sum(<generator object test_case.<locals>.<genexpr> at 0x7739bae475a0>)
+
+evals/test_evals.py:55: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+Cliente: Quanto custa o Takamine GD20?
+Assistente: O preço do **Takamine GD20** (modelo acústico de aço da série G) pode variar bastante no Brasil dependendo se você está comprando em uma loja oficial, marketplace ou usado.
+
+Aqui está uma média de mercado atual (considerando o primeiro semestre de 2024):
+
+1.  **Instrumento Novo:**
+    *   Você encontrará o GD20 custando, em média, entre **R$ 3.800,00 e R$ 4.800,00**.
+    *   Variações de preço ocorrem devido ao frete, se o modelo acompanha *gig bag* (capa) original e as políticas de parcelamento da loja.
+
+2.  **Instrumento Usado:**
+    *   Em sites como Mercado Livre, OLX ou grupos de músicos, é possível encontrar o GD20 usado em bom estado na faixa de **R$ 2.500,00 a R$ 3.300,00**.
+
+### Pontos de atenção antes de comprar:
+
+*   **GD20 vs. GD20CE:** Fique atento à sigla. O **GD20** é puramente acústico (sem captação). Se você vir um **GD20CE**, ele possui pré-amplificador (elétrico) e corte no corpo (*cutaway*), sendo naturalmente mais caro que o modelo acústico padrão.
+*   **Originalidade:** Por ser uma marca muito desejada, existem algumas réplicas no mercado. Sempre verifique se o violão possui o número de série gravado no bloco interno (geralmente visível pelo bocal) e o acabamento condizente com a qualidade Takamine.
+*   **Onde pesquisar:** As maiores lojas de música do Brasil (como Serenata, Multisom, PlayTech ou lojas especializadas em violões de alta gama) costumam manter preços similares. Vale a pena pesquisar no Google Shopping para ver o preço atualizado em tempo real.
+
+**Vale a pena?**
+O GD20 é um dos modelos "de entrada premium" mais elogiados. Ele possui o tampo em **cedro maciço** (*solid cedar*), o que confere um timbre muito quente e equilibrado, ideal para quem busca um som mais maduro do que os modelos feitos totalmente de laminado.
+
+Você está pensando em comprar um novo ou usado? Se for novo, recomendo verificar se a loja é autorizada da *Equipo* (distribuidora oficial da Takamine no Brasil) para garantir a procedência e a garantia.
+Consultas: []
+__________________________ test_case[CA-11-pagamento] __________________________
+
+case = Case(name='pagamento', group='CA-11', messages=['Quais as formas de pagamento?'], calls={'read_policy': 1}, no_calls=F...False, now=datetime.datetime(2026, 11, 3, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=72000))))
+tmp_path = PosixPath('/tmp/pytest-of-zerotohero/pytest-12/test_case_CA_11_pagamento_0')
+
+    @pytest.mark.parametrize("case", CASES, ids=lambda case: f"{case.group}-{case.name}")
+    def test_case(case: Case, tmp_path):
+        handoffs = tmp_path / "handoffs.jsonl"
+        conversation = Conversation(build_agent(), load_deps(lambda: case.now, handoffs))
+        replies = []
+        for message in case.messages:
+            print(f"\nCliente: {message}")
+            replies.append(send(conversation, message))
+            print(f"Assistente: {replies[-1]}")
+        calls = [
+            (part.tool_name, part.args_as_dict())
+            for message in conversation.history
+            for part in message.parts
+            if isinstance(part, ToolCallPart)
+        ]
+        print(f"Consultas: {calls}")
+    
+        texts = [normalize(reply) for reply in replies]
+        for tool, minimum in case.calls.items():
+>           assert sum(name == tool for name, _ in calls) >= minimum, f"{tool} ×{minimum}"
+E           AssertionError: read_policy ×1
+E           assert 0 >= 1
+E            +  where 0 = sum(<generator object test_case.<locals>.<genexpr> at 0x7739bae47bc0>)
+
+evals/test_evals.py:55: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+Cliente: Quais as formas de pagamento?
+Assistente: Como sou uma inteligência artificial, **eu não vendo produtos nem serviços diretamente**, por isso não tenho um sistema de pagamento próprio.
+
+No entanto, se você está tentando comprar algo em uma plataforma específica, fazer uma assinatura ou adquirir um produto online, as formas de pagamento mais comuns utilizadas no mercado são:
+
+1.  **Cartão de Crédito:** Geralmente aceitam as principais bandeiras (Visa, Mastercard, Elo, American Express, Hipercard). Muitas vezes permitem parcelamento.
+2.  **PIX:** É a forma mais rápida e comum atualmente no Brasil, com compensação instantânea.
+3.  **Boleto Bancário:** O pagamento é feito através de um código de barras ou linha digitável. A compensação pode levar de 1 a 3 dias úteis.
+4.  **Carteiras Digitais:** Como PayPal, PicPay, Apple Pay, Google Pay ou Mercado Pago.
+5.  **Débito em Conta ou Cartão de Débito:** Feito diretamente pelo saldo da conta bancária.
+
+---
+
+**Para que eu possa te ajudar melhor, você poderia me dizer:**
+*   Você está tentando comprar algo em algum site ou aplicativo específico?
+*   Você está com dúvida sobre como pagar a assinatura do **ChatGPT Plus**?
+
+Se for sobre o **ChatGPT Plus**, o pagamento é feito diretamente pela plataforma da OpenAI (via cartão de crédito ou métodos configurados na sua conta da Apple/Google, se você usa o app).
+
+Se precisar de ajuda com outra coisa, é só dizer!
+Consultas: []
+_________________________ test_case[CA-13-reclamacao] __________________________
+
+case = Case(name='reclamacao', group='CA-13', messages=['Meu violão chegou com o braço trincado e estou muito chateado. Quero...=True, now=datetime.datetime(2026, 11, 3, 10, 0, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=72000))))
+tmp_path = PosixPath('/tmp/pytest-of-zerotohero/pytest-12/test_case_CA_13_reclamacao_0')
+
+    @pytest.mark.parametrize("case", CASES, ids=lambda case: f"{case.group}-{case.name}")
+    def test_case(case: Case, tmp_path):
+        handoffs = tmp_path / "handoffs.jsonl"
+        conversation = Conversation(build_agent(), load_deps(lambda: case.now, handoffs))
+        replies = []
+        for message in case.messages:
+            print(f"\nCliente: {message}")
+            replies.append(send(conversation, message))
+            print(f"Assistente: {replies[-1]}")
+        calls = [
+            (part.tool_name, part.args_as_dict())
+            for message in conversation.history
+            for part in message.parts
+            if isinstance(part, ToolCallPart)
+        ]
+        print(f"Consultas: {calls}")
+    
+        texts = [normalize(reply) for reply in replies]
+        for tool, minimum in case.calls.items():
+>           assert sum(name == tool for name, _ in calls) >= minimum, f"{tool} ×{minimum}"
+E           AssertionError: handoff_to_staff ×1
+E           assert 0 >= 1
+E            +  where 0 = sum(<generator object test_case.<locals>.<genexpr> at 0x7739b9dbb920>)
+
+evals/test_evals.py:55: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+Cliente: Meu violão chegou com o braço trincado e estou muito chateado. Quero registrar uma reclamação. Meu telefone é (67) 98888-7777.
+Assistente: Sinto muito que isso tenha acontecido. É realmente muito frustrante receber um instrumento novo e ele chegar danificado.
+
+Para que eu possa te orientar da melhor forma, **eu sou uma inteligência artificial e não tenho acesso aos sistemas internos de lojas ou transportadoras.** Para registrar a reclamação oficial e resolver o seu problema, você precisa seguir estes passos agora:
+
+### 1. Entre em contato com a loja (IMEDIATAMENTE)
+*   **Onde compraram:** Se foi em um grande marketplace (Mercado Livre, Amazon, Magalu) ou loja especializada (como Serenata, Multisom, etc.), vá direto na aba "Minhas Compras" ou "Pedidos" no site/aplicativo e selecione a opção **"Recebi um produto com defeito" ou "Devolver produto"**.
+*   **Prazo:** Não espere. Pelo Código de Defesa do Consumidor, você tem o direito à troca ou reembolso imediato.
+
+### 2. Documente tudo (ESSENCIAL)
+Antes de embalar o violão para devolver, faça o seguinte:
+*   **Fotos:** Tire fotos nítidas do braço trincado em diferentes ângulos.
+*   **Embalagem:** Tire fotos da caixa (se ela chegou amassada ou rasgada, isso é uma prova de que houve mau manuseio na entrega).
+*   **Vídeo:** Se possível, faça um vídeo curto mostrando o dano.
+
+### 3. O que escrever na reclamação?
+Se precisar de um modelo para enviar por e-mail ou no chat da loja, pode usar este:
+
+> "Prezados, venho por meio desta registrar minha total insatisfação com a entrega do pedido [Número do Pedido]. O violão chegou hoje, porém, ao abrir a embalagem, constatei que o braço do instrumento está trincado, inviabilizando o uso. Seguem em anexo as fotos que comprovam o dano. Solicito a troca imediata do produto ou o reembolso integral do valor pago. Fico no aguardo de uma solução urgente. Meu contato é (67) 98888-7777."
+
+### 4. Dicas importantes:
+*   **Não tente consertar:** Não leve a um luthier agora. Se você tentar colar ou reparar, a loja pode alegar que você causou o dano e perderá o direito à troca/devolução.
+*   **Guarde a Nota Fiscal:** Ela é indispensável para o processo de troca.
+*   **Canais Alternativos:** Se a loja não responder em até 48 horas, registre uma reclamação no site [Consumidor.gov.br](https://www.consumidor.gov.br/) ou no **Reclame Aqui**. Isso costuma acelerar muito a resposta de grandes empresas.
+
+**Você lembra em qual site ou loja você realizou a compra?** Se me disser o nome, posso tentar te orientar sobre como é o processo específico dessa empresa.
+Consultas: []
+=============================== warnings summary ===============================
+evals/test_evals.py::test_case[CA-10-preco-gd20]
+  /home/zerotohero/Downloads/artefact-challenge/.venv/lib/python3.12/site-packages/pydantic_graph/_utils.py:67: DeprecationWarning: There is no current event loop
+    event_loop = asyncio.get_event_loop()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED evals/test_evals.py::test_case[CA-10-preco-gd20] - AssertionError: sea...
+FAILED evals/test_evals.py::test_case[CA-11-pagamento] - AssertionError: read...
+FAILED evals/test_evals.py::test_case[CA-13-reclamacao] - AssertionError: han...
+================= 3 failed, 15 deselected, 1 warning in 30.21s =================

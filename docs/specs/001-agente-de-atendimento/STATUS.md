@@ -1,19 +1,19 @@
 # STATUS 001 — Agente de atendimento
 
 **Estado:** em execução · **Atualizado em:** 2026-11-02
-**Progresso:** 13/31 tarefas · **Fase atual:** 3 — agente e CLI
-**Próximo passo:** T-14 (testes do agente e da CLI antes do código).
+**Progresso:** 18/31 tarefas · **Fase atual:** 4 — avaliação, modelo e exemplos
+**Próximo passo:** T-19 (primeira execução completa da avaliação, gravada em `evidence/`).
 **Bloqueios:** nenhum.
 **Aceite pendente:** —
-**Último estado verificado:** `14f5a8f` publicado; depois dele, a revisão da Fase 1 reforçou os testes e corrigiu a busca com pontuação (ainda não commitado); ruff limpo, 45 testes passando · 2026-11-03 00:15
+**Último estado verificado:** Fase 3 pronta (agente, persona, CLI; fumaça com o modelo real ok); ruff limpo, 57 testes passando · 2026-11-02 23:27
 
 ## Como retomar
 
-Fase 0 feita (LOG, 2026-11-02, "Execução, Fase 0"). Modelo padrão: `google:gemini-3.1-flash-lite`
-(o `gemini-2.5-flash-lite` dá 404 para a chave nova). PydanticAI instalado é o 2.65.0: construir o
-agente exige `defer_model_check=True` para não pedir a chave, e a CLI precisa desligar o banner
-do primeiro `run` (design §1). O provedor devolve 503 transitório com frequência. Estado real:
-`git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de corte em tasks.md,
+Fases 0 a 3 feitas (LOG, 2026-11-02). Modelo padrão: `google:gemini-3.1-flash-lite`. A avaliação
+roda com `uv run pytest evals -v` e cada execução vai para
+`evidence/evals-NN-<modelo>.txt` (a `evals-00-esqueleto-...` é o vermelho da T-15 e não conta).
+Falha transitória do provedor é repetida pelo executor e impressa como "falha de ambiente". Estado
+real: `git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de corte em tasks.md,
 "Antes de começar".
 
 ## Lacunas
@@ -33,7 +33,7 @@ do primeiro `run` (design §1). O provedor devolve 503 transitório com frequên
 | CA-03 | ✅ testado | `test_status_prevails_over_stock` (5 produtos) | sugestão de alternativas pelo modelo (CA-10) |
 | CA-04 | ✅ testado | `test_available_guitars_up_to_1000`, `test_search_by_name` (6 consultas) | termos com erro de digitação (fora de escopo) |
 | CA-05 | ✅ testado | `test_wrong_contact_looks_like_missing_order` (contato inexistente e contato de outra cliente real: igualdade e ausência de 6 dados), `test_holder_contact_formats`, `test_phone_suffix_needs_eight_digits` | e-mail compartilhado entre clientes 11 e 43 (risco aceito) |
-| CA-06 | ⬜ | — | — |
+| CA-06 | ✅ testado | `test_exactly_the_four_tools` (nomes exatos que chegam ao modelo) | o que o modelo diz sem consultar (CA-12, `extracao`) |
 | CA-07 | ✅ testado | `test_order_total_is_the_recorded_one`, `test_shipped_order_past_estimate_is_late`, `test_cancelled_order_brings_the_reason` (relógio 2026-11-02) | outras datas de referência |
 | CA-08 | ✅ testado | `tests/test_policies.py` (6 testes); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10) | se o modelo consulta a seção certa (CA-11) |
 | CA-09 | ✅ testado | `tests/test_handoff.py`: linha gravada e protocolo devolvido; sem contato, erro e arquivo inexistente | concorrência (CLI de um usuário só); se o modelo encaminha quando deve (CA-13) |
@@ -41,8 +41,8 @@ do primeiro `run` (design §1). O provedor devolve 503 transitório com frequên
 | CA-11 | ⬜ | — | — |
 | CA-12 | ⬜ | — | — |
 | CA-13 | ⬜ | — | — |
-| CA-14 | ⬜ | — | — |
-| CA-15 | ⬜ | — | — |
+| CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca), `test_model_error_warns_and_the_conversation_goes_on` | erros reais do provedor na CLI (vistos só na T-04, fora da CLI) |
+| CA-15 | ✅ testado | `test_model_comes_from_the_environment` | — |
 | CA-16 | ⬜ | — | — |
 | CA-17 | ⬜ | — | — |
 | CA-18 | ⬜ | — | — |
