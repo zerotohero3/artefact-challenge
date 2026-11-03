@@ -1,11 +1,11 @@
 # STATUS 001 — Agente de atendimento
 
 **Estado:** em execução · **Atualizado em:** 2026-11-02
-**Progresso:** 12/31 tarefas · **Fase atual:** 2 — manual consultável e encaminhamento
-**Próximo passo:** T-13 (commit e push da Fase 2); revisão adversarial da Fase 1 em andamento.
+**Progresso:** 13/31 tarefas · **Fase atual:** 3 — agente e CLI
+**Próximo passo:** T-14 (testes do agente e da CLI antes do código).
 **Bloqueios:** nenhum.
 **Aceite pendente:** —
-**Último estado verificado:** `62172c3` publicado em https://github.com/zerotohero3/artefact-challenge (público); ruff limpo, 32 testes passando · 2026-11-02 23:35
+**Último estado verificado:** `14f5a8f` publicado; depois dele, a revisão da Fase 1 reforçou os testes e corrigiu a busca com pontuação (ainda não commitado); ruff limpo, 45 testes passando · 2026-11-03 00:15
 
 ## Como retomar
 
@@ -32,7 +32,7 @@ do primeiro `run` (design §1). O provedor devolve 503 transitório com frequên
 | CA-02 | ✅ testado | `test_max_installments` (5 valores) | o que o modelo diz ao cliente (CA-10) |
 | CA-03 | ✅ testado | `test_status_prevails_over_stock` (5 produtos) | sugestão de alternativas pelo modelo (CA-10) |
 | CA-04 | ✅ testado | `test_available_guitars_up_to_1000`, `test_search_by_name` (6 consultas) | termos com erro de digitação (fora de escopo) |
-| CA-05 | ✅ testado | `test_wrong_contact_looks_like_missing_order` (igualdade e ausência de 6 dados), `test_holder_contact_formats`, `test_phone_suffix_needs_eight_digits` | e-mail compartilhado entre clientes 11 e 43 (risco aceito) |
+| CA-05 | ✅ testado | `test_wrong_contact_looks_like_missing_order` (contato inexistente e contato de outra cliente real: igualdade e ausência de 6 dados), `test_holder_contact_formats`, `test_phone_suffix_needs_eight_digits` | e-mail compartilhado entre clientes 11 e 43 (risco aceito) |
 | CA-06 | ⬜ | — | — |
 | CA-07 | ✅ testado | `test_order_total_is_the_recorded_one`, `test_shipped_order_past_estimate_is_late`, `test_cancelled_order_brings_the_reason` (relógio 2026-11-02) | outras datas de referência |
 | CA-08 | ✅ testado | `tests/test_policies.py` (6 testes); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10) | se o modelo consulta a seção certa (CA-11) |
@@ -62,6 +62,8 @@ seção de tratamento dos dados, como reportadas à loja.
 
 | # | Achado | Registrado em |
 |---|---|---|
+| A-01 | Busca por marca traz marca de nome parecido ("Kala" → Kalani) e modelo de nome contido ("Martin D-28" → D-28E) | design D-09 (custo aceito); README, limitações (T-23) |
+| A-02 | Telefone informado com o 0 de longa distância é recusado como pedido não encontrado | design D-05 (custo aceito); README, limitações (T-23) |
 
 ## Riscos em aberto
 

@@ -37,6 +37,11 @@ def test_active_promotion_shows_original_price_and_percent(store):
     assert ohana["promotion"] == {"name": "Desconto Exclusivo", "percent": 20}
     assert ohana["final_price"] == "R$ 439,20"
     assert ohana["pix_price"] is None
+    assert ohana["installments"] == "5x de R$ 87,84 sem juros"
+
+
+def test_pix_rounds_half_up(store):
+    assert store.search_products(query="Yamaha C40")["products"][0]["pix_price"] == "R$ 569,91"
 
 
 @pytest.mark.parametrize(
@@ -91,10 +96,17 @@ def test_price_range_uses_final_price(store):
         ("violão Giannini GF-3D", 96),
         ("ukulele Ohana CK-20", 121),
         ("Shelby SN-7C", 113),
+        ("violão, Giannini GF-3D?", 96),
     ],
 )
 def test_search_by_name(store, query, product_id):
     assert ids(store.search_products(query=query)) == [product_id]
+
+
+def test_results_are_capped_with_the_full_total(store):
+    result = store.search_products()
+    assert result["total"] == 65
+    assert len(result["products"]) == 20
 
 
 def test_unknown_category_lists_valid_ones(store):
@@ -106,10 +118,12 @@ def test_unknown_category_lists_valid_ones(store):
 def test_wrong_contact_looks_like_missing_order(store):
     assert store.get_order(10, "bruno.martins@jmail.com", TODAY)["found"] is True
 
-    wrong = store.get_order(10, "joao@exemplo.com", TODAY)
-    assert wrong == store.get_order(999, "joao@exemplo.com", TODAY)
-    for leaked in ["Bruno", "bruno.martins", "98543", "Music Man", "8.732", "8732"]:
-        assert leaked not in str(wrong)
+    missing = store.get_order(999, "joao@exemplo.com", TODAY)
+    for contact in ["joao@exemplo.com", "anacarol.ferreira@coldmail.com", "(67) 99654-7821"]:
+        wrong = store.get_order(10, contact, TODAY)
+        assert wrong == missing
+        for leaked in ["Bruno", "bruno.martins", "98543", "Music Man", "8.732", "8732"]:
+            assert leaked not in str(wrong)
 
 
 @pytest.mark.parametrize(
@@ -153,6 +167,14 @@ def test_shipped_order_past_estimate_is_late(store):
     assert order["days_since_estimated_delivery"] == 247
     assert order["days_since_order"] == 260
     assert order["cancellation_reason"] is None
+
+
+def test_delivered_order_is_never_late(store):
+    order = store.get_order(7, "leticia.rocha@jmail.com", TODAY)
+    assert order["found"] is True
+    assert order["status"] == "entregue"
+    assert order["days_since_estimated_delivery"] == 258
+    assert order["late"] is False
 
 
 def test_cancelled_order_brings_the_reason(store):

@@ -105,7 +105,9 @@ cliente, nunca e-mail ou telefone.
 **Alternativas consideradas:** pedir ao modelo que confira o contato (regra no prompt cai com
 prompt injection); verificar uma vez por sessão (estado escondido; o modelo repete o contato, que
 já está na conversa).
-**Custo aceito:** o cliente informa o contato a cada pedido diferente.
+**Custo aceito:** o cliente informa o contato a cada pedido diferente. Telefone com o 0 de longa
+distância ("067 98543-2109") não confere e recebe a resposta de pedido não encontrado: o erro é
+para o lado seguro, e o cliente tenta de novo sem o 0.
 **Confirmação:** CA-05 (asserção dupla).
 
 ### D-06 · Ferramentas devolvem estado do domínio, não instruções — vigente
@@ -152,7 +154,10 @@ sobre o preço final. Resultado ordenado pelo preço final, até 20 itens, com o
 P-04); casar qualquer termo em vez de todos ("violão yamaha" traria baixo, bateria e teclado
 Yamaha); busca aproximada para erro de digitação (fora de escopo).
 **Custo aceito:** "violão para iniciante" não casa ("para" e "iniciante" não estão no nome nem na
-categoria); o modelo filtra por categoria e preço e lê as descrições do resultado.
+categoria); o modelo filtra por categoria e preço e lê as descrições do resultado. Como o termo casa
+dentro do nome compactado, "Kala" também traz os Kalani e "Martin D-28" também traz o D-28E: o
+resultado tem o nome completo de cada produto, e a resposta ao cliente sai dele. A comparação com a
+categoria usa o termo compactado, então pontuação colada ("violões,") não atrapalha.
 **Confirmação:** CA-04.
 
 ### D-10 · Dados lidos uma vez, em memória, só leitura — vigente

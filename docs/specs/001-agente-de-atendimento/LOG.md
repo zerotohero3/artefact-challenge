@@ -240,3 +240,41 @@ têm LF (`file data/*.csv`), e a carga completa da `Store` antes e depois é id�
 (repr de produtos, categorias, clientes, pedidos e itens, 43.038 bytes, `cmp` sem diferença).
 `git grep` só olha arquivos rastreados: antes do commit, a busca precisa de `--untracked`; com ele,
 só `handoff.py` aparece.
+
+## 2026-11-03 — Revisão adversarial da Fase 1
+
+Um agente sem a conversa revisou o commit `62172c3` contra a spec, com mutações do código numa
+cópia exportada do commit. Cada achado foi reproduzido aqui antes de virar mudança:
+
+1. **Testes não provavam R-06 (alta).** O código recusava certo, mas as mutações "qualquer cliente
+   com esse contato vê o pedido" (IDOR) e "telefone aceito só pelo tamanho" passavam nos 32
+   testes, porque o único contato errado testado não existia na base. Reproduzido: 32 verdes com
+   cada mutação. Correção: o teste de contato errado passou a usar também o e-mail e o telefone de
+   outra cliente real (a do pedido 8) e confere a igualdade com o pedido inexistente para os três.
+2. **"Kala" traz Kalani; "Martin D-28" traz o D-28E (média).** Reproduzido (10 resultados para
+   "Kala", 3 deles Kalani). É o que a D-09 manda (termo dentro do nome compactado), e trocar por
+   palavra inteira quebraria "GD20" contra "GD 20". Fica como custo declarado na D-09; vai para as
+   limitações do README.
+3. **Pontuação colada ao termo impedia casar a categoria (média-baixa).** "violões, Yamaha", "violões?"
+   e "ukuleles." davam 0. O código aplicava o singular ao termo sem compactá-lo, ao contrário da
+   D-09. Teste novo (`"violão, Giannini GF-3D?"` → 96) vermelho por asserção antes da correção;
+   depois, `singular(compact(term))` e os quatro exemplos dão 7, 7, 35 e 15.
+4. **`late` só para pedido enviado não tinha teste (média-baixa).** A mutação que ignora o status
+   passava. Teste novo: pedido 7, entregue e com previsão 258 dias atrás, sai com `late` falso.
+5. **Regras da D-04 sem teste no produto (baixa).** Testes novos: parcelamento sobre o preço final
+   no Ohana (5x de R$ 87,84, número do LOG da especificação), PIX do Yamaha C40 com arredondamento
+   meio-para-cima (599,90 × 0,95 = 569,905 → R$ 569,91) e limite de 20 itens com o total de 65. A
+   "maior promoção ativa" não tem caso na base (nenhum produto tem duas ativas); ficou sem teste.
+6. **O comando da CA-21 falhava no `62172c3` (baixa).** Já resolvido no `14f5a8f` (leitura com
+   `read_text`).
+7. **Telefone com 0 de longa distância é recusado (baixa).** Reproduzido. Recusa do lado seguro;
+   custo declarado na D-05 e limitação no README.
+8. **Comentário citava "(P-01)" (mínima).** Contraria o AGENTS.md; o comentário passou a dizer a
+   regra do manual.
+
+Prova de que os testes novos pegam o que antes passava: cada mutação (IDOR, telefone pelo
+tamanho, `late` sem status, parcela sobre o preço de tabela, arredondamento bancário, sem limite
+de 20) reprova exatamente um teste além do de pontuação, que ainda estava vermelho. Depois da
+correção: 45 testes passando, ruff limpo. A lista de marcas da D-17 continua sem teste contra
+marcas que não são de instrumento ("Aquila", "LR Baggs"); o teste da CA-20 confere os 9 produtos
+da faixa e o comando do T-08 confirmou que só 6 dos 65 perdem a descrição.

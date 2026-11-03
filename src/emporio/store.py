@@ -10,8 +10,8 @@ from pathlib import Path
 
 # Manual §6.2: PIX discount only applies to products without a promotion.
 PIX_DISCOUNT = Decimal("0.05")
-# Manual §3.1: (max installments, minimum installment value), the specific rule wins over the
-# payment table (P-01).
+# Manual §3.1: (max installments, minimum installment value); it is more specific than the
+# R$ 100,00 minimum in the payment table of §3.
 INSTALLMENT_TIERS = [(3, Decimal("50")), (6, Decimal("80")), (12, Decimal("100"))]
 # Brands found in product names and descriptions; a description citing a brand that is not in
 # the product name belongs to another product.
@@ -88,7 +88,7 @@ class Product:
         name = compact(self.name)
         category_words = {singular(w) for w in re.findall(r"[a-z0-9]+", normalize(self.category))}
         return all(
-            compact(term) in name or singular(normalize(term)) in category_words for term in terms
+            compact(term) in name or singular(compact(term)) in category_words for term in terms
         )
 
     def as_dict(self) -> dict:

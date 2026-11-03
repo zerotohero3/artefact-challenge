@@ -109,7 +109,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   ⚠️ Pedir a seção "1" não pode trazer a "10".
   → *Verificação:* T-11 verde; verificação completa com saída 0.
 
-- [ ] **T-13 · Commit e push da Fase 2**
+- [x] **T-13 · Commit e push da Fase 2**
   → *Verificação:* `git status` limpo; push feito.
 
 ## Fase 3 — Agente e CLI
