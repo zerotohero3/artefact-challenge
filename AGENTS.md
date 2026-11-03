@@ -12,6 +12,7 @@ uv run emporio [--show-tools]    # conversa no terminal; precisa de GOOGLE_API_K
 uv run ruff check && uv run ruff format --check
 uv run pytest                    # suíte offline; não chama o modelo
 uv run pytest evals -v           # avaliação com o modelo real; consome cota da API
+uv run python scripts/generate_examples.py [N ...]  # regrava os exemplos em examples/
 ```
 
 ## Regras de código

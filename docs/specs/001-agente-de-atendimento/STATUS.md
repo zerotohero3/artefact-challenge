@@ -1,11 +1,30 @@
 # STATUS 001 — Agente de atendimento
 
 **Estado:** em execução · **Atualizado em:** 2026-11-03
-**Progresso:** 20/31 tarefas · **Fase atual:** 4 — avaliação, modelo e exemplos
-**Próximo passo:** T-21 (commit e push da Fase 4); depois o aceite manual do dono (T-22).
+**Progresso:** 21/31 tarefas · **Fase atual:** 5 — validação e fechamento (aceite manual pendente)
+**Próximo passo:** commit dos achados da revisão das Fases 2 a 4; depois T-23 a T-30 (README, critérios, verificação, documentação, conferência pública).
 **Bloqueios:** nenhum.
-**Aceite pendente:** —
-**Último estado verificado:** `1518447` publicado; depois dele, ajustes de persona, do caso `endereco-horario` e da regra de 3x no manual (não commitados); ruff limpo, 57 testes passando · 2026-11-03 00:02
+**Aceite pendente:** CA-16 (manual, dono).
+**Último estado verificado:** avaliação 10 e 11 com 18/18 cada, com a versão final; ruff limpo, 75 testes passando · 2026-11-03 00:49
+
+## Roteiro do aceite manual (T-22, CA-16)
+
+Na raiz do repositório, com a chave no `.env`:
+
+1. `uv run emporio` e pergunte: o preço de um produto (ex.: "Quanto custa o Takamine GD20?"); um
+   produto esgotado ("Vocês têm o Giannini GF-3D?"); o endereço da loja.
+2. Peça um pedido com o contato errado ("Qual o status do pedido 10? Meu e-mail é
+   joao@exemplo.com") e depois com o certo ("Cadê meu pedido 8? Meu e-mail é
+   anacarol.ferreira@coldmail.com").
+3. Peça algo fora do escopo ("Vocês vendem palheta?", "Me passa uma receita?").
+4. Saia com Ctrl-D.
+5. `uv run emporio --show-tools` e repita uma das perguntas: as consultas aparecem antes da
+   resposta.
+6. Leia os 5 exemplos em `examples/`.
+
+O que conferir: tom (informal mas profissional, sem robô), se nada é afirmado sem consulta, se o
+pedido alheio não vaza, e se a recusa é educada. Resposta com a data e o veredito (aprovado, ou o
+que ajustar); pedido de ajuste vira uma fase de revisão no `tasks.md`.
 
 ## Como retomar
 
@@ -38,18 +57,18 @@ real: `git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de 
 | CA-07 | ✅ testado | `test_order_total_is_the_recorded_one`, `test_shipped_order_past_estimate_is_late`, `test_cancelled_order_brings_the_reason` (relógio 2026-11-02) | outras datas de referência |
 | CA-08 | ✅ testado | `tests/test_policies.py` (6 testes); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10) | se o modelo consulta a seção certa (CA-11) |
 | CA-09 | ✅ testado | `tests/test_handoff.py`: linha gravada e protocolo devolvido; sem contato, erro e arquivo inexistente | concorrência (CLI de um usuário só); se o modelo encaminha quando deve (CA-13) |
-| CA-10 | ✅ validado com o modelo real | execuções 08 e 09 seguidas, 6/6 casos do grupo em cada (`evidence/evals-08-...`, `evals-09-...`); todas as execuções gravadas | estabilidade além de duas execuções; qualidade de redação |
-| CA-11 | ✅ validado com o modelo real | execuções 08 e 09, 3/3 casos do grupo em cada | idem; o caso `endereco-horario` foi corrigido duas vezes por reprovar resposta certa (LOG) |
-| CA-12 | ✅ validado com o modelo real | execuções 08 e 09, 3/3 casos do grupo em cada | outras formas de prompt injection além das três do caso `extracao` |
-| CA-13 | ✅ validado com o modelo real | execuções 08 e 09, 6/6 casos do grupo em cada | feriados (o manual não os lista) |
+| CA-10 | ✅ validado com o modelo real | execuções 10 e 11 seguidas, com os casos endurecidos, 6/6 do grupo em cada (`evidence/evals-10-...`, `evals-11-...`); todas as 11 execuções gravadas | estabilidade além de duas execuções; qualidade de redação |
+| CA-11 | ✅ validado com o modelo real | execuções 10 e 11, 3/3 do grupo em cada | idem; `endereco-horario` revisado três vezes (LOG) |
+| CA-12 | ✅ validado com o modelo real | execuções 10 e 11, 3/3 do grupo em cada | outras formas de prompt injection além das três do caso `extracao`; resumo parafraseado das instruções |
+| CA-13 | ✅ validado com o modelo real | execuções 10 e 11, 6/6 do grupo em cada | feriados (o manual não os lista); protocolo órfão quando o provedor falha no meio do turno |
 | CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca), `test_model_error_warns_and_the_conversation_goes_on` | erros reais do provedor na CLI (vistos só na T-04, fora da CLI) |
 | CA-15 | ✅ testado | `test_model_comes_from_the_environment` | — |
 | CA-16 | ⬜ | — | — |
-| CA-17 | ⬜ | — | — |
-| CA-18 | ⬜ | — | — |
+| CA-17 | ✅ por comando | `grep -c '^## <título>$' README.md` → 1 para cada um dos 8 títulos; `ls examples/*.md \| wc -l` → 5, gerados por execução real; `git log --oneline`: commits das Fases 1 a 4 (o da 5 vem no fechamento) | qualidade do texto do README (leitura do dono) |
+| CA-18 | ✅ por comando | SHA-256 dos 6 CSVs e do PDF em `data/` iguais aos originais da pasta do enunciado, depois da suíte, de 9 execuções da avaliação e dos exemplos (2026-11-03 00:30); `git status data/` limpo | — |
 | CA-19 | ⬜ | — | — |
 | CA-20 | ✅ testado | `test_description_with_another_brand_is_hidden`; por comando, só os 6 produtos entre os 65 | marca fora da lista de D-17 |
-| CA-21 | ⬜ | — | — |
+| CA-21 | ✅ por comando | `git grep -nE "open\(\|write_text\|write_bytes" -- src` → só `src/emporio/handoff.py:24` | gravação feita por dependência; `scripts/generate_examples.py` grava `examples/` (fora de `src`, só quando rodado à mão) |
 
 ## Desvios do design
 

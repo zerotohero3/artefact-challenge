@@ -3,7 +3,7 @@ import re
 import time
 
 import pytest
-from cases import CASES, Case
+from cases import CASES, Case, problems
 from dotenv import load_dotenv
 from pydantic_ai.exceptions import (
     ModelConnectionError,
@@ -14,7 +14,6 @@ from pydantic_ai.exceptions import (
 from pydantic_ai.messages import ToolCallPart
 
 from emporio.agent import ROOT, Conversation, build_agent, load_deps
-from emporio.store import normalize
 
 load_dotenv(ROOT / ".env")
 
@@ -51,23 +50,8 @@ def test_case(case: Case, tmp_path):
     ]
     print(f"Consultas: {calls}")
 
-    texts = [normalize(reply) for reply in replies]
-    for tool, minimum in case.calls.items():
-        assert sum(name == tool for name, _ in calls) >= minimum, f"{tool} ×{minimum}"
-    if case.no_calls:
-        assert calls == []
-    if case.args:
-        assert case.args(calls), case.args.__name__
-    for pattern in case.contains:
-        assert re.search(pattern, texts[-1]), f"falta: {pattern}"
-    for pattern in case.absent:
-        assert not re.search(pattern, texts[-1]), f"não podia ter: {pattern}"
-    for pattern in case.first:
-        assert re.search(pattern, texts[0]), f"falta na 1ª: {pattern}"
-    for pattern in case.never:
-        for text in texts:
-            assert not re.search(pattern, text), f"não podia ter: {pattern}"
+    assert problems(case, replies, calls) == []
     if case.handoff_recorded:
-        protocol = re.search(r"em-[0-9a-f]{6}", texts[-1])[0].upper()
+        protocol = re.search(r"EM-[0-9A-F]{6}", replies[-1].upper())[0]
         recorded = [json.loads(line)["protocol"] for line in handoffs.read_text().splitlines()]
         assert protocol in recorded

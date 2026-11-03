@@ -95,6 +95,32 @@ def test_turn_reports_the_tool_calls(deps):
     assert returned and returned[0]["products"][0]["final_price"] == "R$ 2.199,00"
 
 
+def test_search_passes_every_filter_to_the_store(deps):
+    args = {"category": "Violões", "min_price": 500, "max_price": 800, "only_available": True}
+    model, returned = calling("search_products", args)
+    Conversation(build_agent(model), deps).send("Violões disponíveis de 500 a 800")
+
+    expected = deps.store.search_products(None, "Violões", 500, 800, True)
+    assert expected["total"] > 0
+    assert returned and returned[0] == expected
+
+
+def test_order_lookup_refuses_another_customer_contact(deps):
+    model, returned = calling(
+        "get_order", {"order_id": 10, "contact": "anacarol.ferreira@coldmail.com"}
+    )
+    Conversation(build_agent(model), deps).send("Pedido 10, e-mail anacarol.ferreira@coldmail.com")
+
+    assert returned and returned[0]["found"] is False
+
+
+def test_policy_reads_only_the_sections_asked(deps):
+    model, returned = calling("read_policy", {"sections": ["4.1"]})
+    Conversation(build_agent(model), deps).send("Posso devolver?")
+
+    assert returned and returned[0] == deps.policies.read(["4.1"])
+
+
 def test_order_lookup_uses_the_conversation_clock(deps):
     model, returned = calling(
         "get_order", {"order_id": 8, "contact": "anacarol.ferreira@coldmail.com"}
@@ -108,7 +134,12 @@ def test_order_lookup_uses_the_conversation_clock(deps):
 def test_handoff_goes_to_the_conversation_log(deps, tmp_path):
     model, returned = calling(
         "handoff_to_staff",
-        {"reason": "human_request", "summary": "Quer falar com alguém", "contact": "67988887777"},
+        {
+            "reason": "complaint",
+            "summary": "Pedido 8 atrasado",
+            "contact": "67988887777",
+            "order_id": 8,
+        },
     )
     Conversation(build_agent(model), deps).send("Quero falar com um atendente")
 
@@ -116,6 +147,12 @@ def test_handoff_goes_to_the_conversation_log(deps, tmp_path):
     record = json.loads((tmp_path / "handoffs.jsonl").read_text(encoding="utf-8"))
     assert record["protocol"] == returned[0]["protocol"]
     assert record["created_at"] == "2026-11-08T20:00:00-04:00"
+    assert (record["reason"], record["summary"], record["contact"], record["order_id"]) == (
+        "complaint",
+        "Pedido 8 atrasado",
+        "67988887777",
+        8,
+    )
 
 
 def test_model_failure_keeps_the_history(deps):

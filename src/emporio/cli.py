@@ -3,10 +3,10 @@ import os
 import sys
 
 import pydantic_ai
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 from pydantic_ai.exceptions import AgentRunError
 
-from emporio.agent import Conversation, build_agent, load_deps, model_name_from_env
+from emporio.agent import ROOT, Conversation, build_agent, load_deps, model_name_from_env
 
 
 def run(conversation, read=input, write=print, show_tools=False) -> None:
@@ -23,6 +23,9 @@ def run(conversation, read=input, write=print, show_tools=False) -> None:
             continue
         try:
             turn = conversation.send(message)
+        except KeyboardInterrupt:
+            write("")
+            return
         except AgentRunError as error:
             reason = type(error).__name__
             write(f"Não consegui responder agora ({reason}). Tente de novo em instantes.")
@@ -41,7 +44,7 @@ def main() -> None:
         "--show-tools", action="store_true", help="mostra as consultas feitas a cada resposta"
     )
     args = parser.parse_args()
-    load_dotenv(find_dotenv(usecwd=True))
+    load_dotenv(ROOT / ".env")
     model = model_name_from_env()
     if model.startswith("google") and not os.environ.get("GOOGLE_API_KEY"):
         print(

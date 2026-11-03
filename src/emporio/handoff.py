@@ -1,7 +1,13 @@
 import json
+import re
 import secrets
 from datetime import datetime
 from pathlib import Path
+
+
+def is_contact(text: str) -> bool:
+    is_email = re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", text) is not None
+    return is_email or len(re.sub(r"\D", "", text)) >= 8
 
 
 class HandoffLog:
@@ -9,7 +15,7 @@ class HandoffLog:
         self.path = path
 
     def register(self, reason, summary, contact, order_id, now: datetime) -> dict:
-        if not contact.strip():
+        if not is_contact(contact.strip()):
             return {"error": "Informe um telefone ou e-mail para a equipe retornar."}
         protocol = f"EM-{secrets.token_hex(3).upper()}"
         record = {

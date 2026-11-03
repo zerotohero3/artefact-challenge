@@ -2,6 +2,8 @@ import json
 import re
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from emporio.handoff import HandoffLog
 
 NOW = datetime(2026, 11, 2, 21, 53, tzinfo=timezone(timedelta(hours=-4)))
@@ -38,9 +40,10 @@ def test_handoff_appends(tmp_path):
     assert protocols == [first["protocol"], second["protocol"]]
 
 
-def test_handoff_without_contact_records_nothing(tmp_path):
+@pytest.mark.parametrize("contact", ["  ", "N/A", "não informado", "-", "67 9888", "ana@"])
+def test_handoff_without_contact_records_nothing(tmp_path, contact):
     path = tmp_path / "handoffs.jsonl"
-    result = HandoffLog(path).register("complaint", "Reclamação", "  ", None, NOW)
+    result = HandoffLog(path).register("complaint", "Reclamação", contact, None, NOW)
 
     assert result == {"error": "Informe um telefone ou e-mail para a equipe retornar."}
     assert not path.exists()

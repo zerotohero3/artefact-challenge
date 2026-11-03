@@ -479,3 +479,76 @@ informado e o pedido 8). Observações: o modelo escreve "GN-15 Nylon Cedro" (no
 "Cedr"); a recomendação para iniciante do exemplo 1 vem das descrições do resultado anterior e de
 conhecimento geral ("nylon machuca menos os dedos"), sem consulta nova. `ls examples/*.md | wc -l`
 → 5; o exemplo 3 mostra `get_order` e `read_policy`.
+
+## 2026-11-03 — Revisão adversarial das Fases 2 a 4
+
+Um agente sem a conversa revisou `62172c3..4ffe476` (manual, encaminhamento, agente, persona, CLI,
+avaliação), com mutações numa cópia exportada e um simulador que roda os casos com respostas
+roteirizadas no lugar do modelo. Reproduzido aqui antes de virar mudança (00:38): as respostas
+erradas de `acessorio`, `endereco-horario`, `devolucao`, `reclamacao` e `contato-errado` passavam
+nos casos; o encaminhamento gravava o contato "N/A"; a mutação "CLI captura só `ModelHTTPError`" e
+a mutação IDOR na ligação de `get_order` passavam na suíte (62 verdes cada).
+
+**Corrigido, com teste primeiro:**
+1. **Encaminhamento sem contato de verdade (R-11).** "N/A", "não informado", "-", "67 9888" e
+   "ana@" geravam protocolo. Teste parametrizado: 5 vermelhos por asserção; depois, o contato
+   precisa ser um e-mail com domínio ou ter 8 dígitos ou mais (a régua da verificação de pedido).
+2. **Ligação das ferramentas sem teste (CA-06, R-05, R-07, CA-09).** Testes novos: a busca repassa
+   categoria, faixa e disponibilidade (argumentos em que cada filtro muda o resultado); `get_order`
+   com o contato de outra cliente não encontra; `read_policy` devolve só a seção pedida; o
+   encaminhamento grava motivo, resumo, contato e pedido. Verdes de saída (o código estava certo);
+   as mutações M4 (mínimo e máximo trocados), M5 (ignora disponibilidade), M6 (ignora categoria),
+   M7 (pedido some), M8 (motivo e resumo trocados), M9 (manual inteiro) e M12 (IDOR) reprovam
+   cada uma exatamente um teste.
+3. **CLI testada só com `ModelHTTPError` (CA-14).** O teste passou a cobrir 503, 429, conexão e
+   HTTP; a mutação M1 reprova 3 testes.
+4. **Ctrl-C durante a resposta derrubava a CLI** (o contrato da CLI diz que Ctrl-C sai). Teste
+   novo: o `KeyboardInterrupt` escapou do `run()` e interrompeu o próprio pytest; depois da
+   correção, a conversa encerra limpa.
+5. **CA-15 só provada no `build_agent`.** Teste novo de que a CLI usa `EMPORIO_MODEL`; a mutação
+   M14 (modelo fixo na CLI) reprova.
+6. **`.env` procurado a partir da pasta atual,** subindo até achar qualquer `.env` (inclusive de
+   outro projeto). Passa a ser lido só da raiz do projeto, como na avaliação e nos exemplos. Rodada
+   de fora do repositório, a CLI acha a chave e abre a conversa.
+Suíte: 75 testes, ruff limpo.
+
+**Casos da avaliação endurecidos (D-12; design §4 revisado em 2026-11-03).** A revisão mostrou 14
+casos que aprovavam um agente errado, e um deles era o `fech` que eu mesmo tinha aberto no
+`endereco-horario`. Endurecer não é afrouxar, mas muda o instrumento de aceite; cada mudança está
+na tabela do design, com o motivo. Em resumo: PIX sobre promoção proibido (`promo-ativa`); nenhum
+percentual prometido (`campanha-futura`); o GF-3D precisa ser consultado sem o filtro de
+disponibilidade (`esgotado`); três buscas, com os equivalentes do descontinuado, e "ainda não"
+só como "ainda não está/chegou/foi" (`fora-de-linha`); "domingo" e "fecha/não abre" na mesma
+oração (`endereco-horario`); prazo vencido afirmado e nunca negado (`devolucao`); nenhum status de
+pedido para contato errado (`contato-errado`); nenhum nome de consulta interna (`extracao`); motivo
+e contato conferidos e "24 horas" em vez de "24", que casava dentro do protocolo (`reclamacao`);
+protocolo, motivo e "09:00" (`fora-do-expediente`); `\b` antes de "so", que casava em "nosso"
+(`acessorio`); mais ingredientes proibidos (`fora-de-tema`). A conferência saiu do teste para a
+função `problems()` em `evals/cases.py`, para poder ser reaplicada sem o modelo.
+
+**Conferência sem gastar cota (00:41), por script de reaplicação:** as respostas e consultas
+gravadas nas execuções 08 e 09, lidas inteiras e corretas, passam em todos os casos novos (0
+reprovações em 36); as 11 respostas erradas roteirizadas da revisão agora reprovam; na execução
+07, o caso novo pega o "selecionei algumas opções" sem a busca, que antes só a leitura tinha visto.
+
+**Registrado, não corrigido:**
+- **Protocolo órfão quando o provedor falha no meio do turno.** Se o encaminhamento é gravado e a
+  requisição seguinte ao modelo falha, a CLI avisa, o histórico não guarda o turno, o cliente não
+  recebe aquele protocolo e, ao repetir, gera outro (reproduzido pela revisão com `FunctionModel`;
+  aqui, lido no código: `Conversation.send` só guarda o histórico de execução completa). A equipe
+  recebe dois registros do mesmo contato. Corrigir exige guardar o turno parcial, o que mexe no
+  controle de execução do framework; fica nas limitações do README.
+- **Feriados:** `opening_status` diz "aberta" em feriado; fora de escopo (spec §6), no README.
+- **Menores:** `order_id` do encaminhamento não é conferido contra o contato (a equipe confere);
+  `EMPORIO_NOW` com fuso explícito é lido como horário de Campo Grande; protocolo de 6 hexadecimais
+  sem checagem de unicidade (colisão provável só perto de milhares de registros); modelo sem prefixo
+  de provedor em `EMPORIO_MODEL` só falha na primeira mensagem.
+A comparação por script de `evals/cases.py` com a tabela do design não achou divergência de fato.
+Como o código do agente mudou (validação do contato) e os casos também, a avaliação roda de novo:
+execuções 10 e 11.
+
+**Execução 10 (00:43–00:46): 18/18** e **execução 11 (00:46–00:48): 18/18**, com os casos
+endurecidos e o encaminhamento validado, sem mudança entre as duas; 4 e 5 falhas de ambiente 429,
+absorvidas. Lidas as respostas mais sensíveis da 10 (equivalentes de 7 cordas buscados, recusa
+de dados de cliente sem vazar nada, reclamação com motivo e telefone certos e "24 horas úteis").
+**CA-10 a CA-13 revalidados com a versão final.** Total: 11 execuções gravadas.

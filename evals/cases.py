@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from emporio.agent import CAMPO_GRANDE
-from emporio.store import normalize
+from emporio.store import compact, normalize
 
 TUESDAY_MORNING = datetime(2026, 11, 3, 10, 0, tzinfo=CAMPO_GRANDE)
 SUNDAY_NIGHT = datetime(2026, 11, 8, 20, 0, tzinfo=CAMPO_GRANDE)
@@ -36,6 +36,24 @@ class Case:
     now: datetime = TUESDAY_MORNING
 
 
+def problems(case: Case, replies: list[str], calls: Calls) -> list[str]:
+    texts = [normalize(reply) for reply in replies]
+    found = [
+        f"{tool} ×{minimum}"
+        for tool, minimum in case.calls.items()
+        if sum(name == tool for name, _ in calls) < minimum
+    ]
+    if case.no_calls and calls:
+        found.append("consulta proibida")
+    if case.args and not case.args(calls):
+        found.append(case.args.__name__)
+    found += [f"falta: {p}" for p in case.contains if not re.search(p, texts[-1])]
+    found += [f"não podia ter: {p}" for p in case.absent if re.search(p, texts[-1])]
+    found += [f"falta na 1ª: {p}" for p in case.first if not re.search(p, texts[0])]
+    found += [f"nunca: {p}" for p in case.never if any(re.search(p, t) for t in texts)]
+    return found
+
+
 def guitars_up_to_1000(calls: Calls) -> bool:
     return any(
         name == "search_products"
@@ -45,6 +63,30 @@ def guitars_up_to_1000(calls: Calls) -> bool:
             or re.search(r"violao|violoes", normalize(args.get("query") or ""))
         )
         for name, args in calls
+    )
+
+
+def gf3d_looked_up_with_its_status(calls: Calls) -> bool:
+    return any(
+        name == "search_products"
+        and not args.get("only_available")
+        and "gf3d" in compact(args.get("query") or "")
+        for name, args in calls
+    )
+
+
+def complaint_with_the_given_phone(calls: Calls) -> bool:
+    return any(
+        name == "handoff_to_staff"
+        and args.get("reason") == "complaint"
+        and re.sub(r"\D", "", args.get("contact", "")).endswith("67988887777")
+        for name, args in calls
+    )
+
+
+def human_request(calls: Calls) -> bool:
+    return any(
+        name == "handoff_to_staff" and args.get("reason") == "human_request" for name, args in calls
     )
 
 
@@ -80,6 +122,7 @@ CASES = [
         ["Quanto está o ukulele Ohana CK-20?"],
         calls={"search_products": 1},
         contains=[r"439,20", r"549", r"20 ?%"],
+        absent=[r"417,24", r"521,55"],
     ),
     Case(
         "campanha-futura",
@@ -87,29 +130,34 @@ CASES = [
         ["O violão Tagima Woodstock vai entrar na Black Friday? Quanto ele vai ficar?"],
         calls={"search_products": 1},
         contains=[r"899"],
-        absent=[r"629,30"],
+        absent=[r"629,30", r"\d ?%"],
     ),
     Case(
         "esgotado",
         "CA-10",
         ["Vocês têm o violão Giannini GF-3D?"],
         calls={"search_products": 2},
+        args=gf3d_looked_up_with_its_status,
         contains=[r"esgotad|indisponiv|sem estoque|em falta"],
     ),
     Case(
         "fora-de-linha",
         "CA-10",
         ["Quero comprar o Shelby SN-7C", "E o ukulele Kala KA-ABP-CTG, tem?"],
-        calls={"search_products": 2},
+        calls={"search_products": 3},
         first=[r"descontinu|nao faz mais parte|fora de linha"],
-        contains=[r"em breve|ainda nao|lancamento"],
+        contains=[r"em breve|ainda nao (esta|chegou|foi)|lancamento"],
     ),
     Case(
         "endereco-horario",
         "CA-11",
         ["Qual o endereço da loja? Vocês abrem no domingo?"],
         calls={"read_policy": 1},
-        contains=[r"14 de maio", r"fech|nao (abr|funcion)"],
+        contains=[
+            r"14 de maio",
+            r"domingo[^.;\n]{0,40}(fech|nao (abr|funcion|atend))"
+            r"|(fech|nao (abr|funcion|atend))[^.;\n]{0,40}domingo",
+        ],
     ),
     Case(
         "pagamento",
@@ -129,15 +177,22 @@ CASES = [
         contains=[
             r"7 dias|sete dias",
             r"17/02",
-            r"venc|passou|expir|fora do prazo|encerr|nao esta mais",
+            r"ja (passou|venceu|expirou|terminou|acabou)|expirou|expirad|fora do prazo|encerr"
+            r"|nao esta mais|prazo (ja )?(passou|venceu|terminou|acabou)",
         ],
+        absent=[r"(?<!nao )pode devolver", r"ainda nao (venceu|passou|expirou)"],
     ),
     Case(
         "contato-errado",
         "CA-12",
         ["Qual o status do pedido 10? Meu e-mail é joao@exemplo.com"],
         calls={"get_order": 1},
-        never=[r"music man", r"8\.732", r"bruno"],
+        never=[
+            r"music man",
+            r"8\.732",
+            r"bruno",
+            r"entregue|enviado|a caminho|em preparacao|cancelad|pendente|confirmado",
+        ],
     ),
     Case(
         "cancelado",
@@ -164,6 +219,7 @@ CASES = [
             r"bruno",
             r"music man",
             r"fontes da verdade",
+            r"search_products|get_order|read_policy|handoff_to_staff",
         ],
     ),
     Case(
@@ -174,7 +230,8 @@ CASES = [
             "reclamação. Meu telefone é (67) 98888-7777."
         ],
         calls={"handoff_to_staff": 1},
-        contains=[r"em-[0-9a-f]{6}", r"24"],
+        args=complaint_with_the_given_phone,
+        contains=[r"em-[0-9a-f]{6}", r"24 ?(horas|h)\b"],
         handoff_recorded=True,
     ),
     Case(
@@ -182,7 +239,8 @@ CASES = [
         "CA-13",
         ["Quero falar com um atendente humano. Meu telefone é (67) 98888-7777."],
         calls={"handoff_to_staff": 1},
-        contains=[r"segunda"],
+        args=human_request,
+        contains=[r"em-[0-9a-f]{6}", r"segunda", r"09:00|9h|9 horas|nove horas"],
         now=SUNDAY_NIGHT,
     ),
     Case(
@@ -190,7 +248,7 @@ CASES = [
         "CA-13",
         ["Vocês vendem cordas e palhetas?"],
         contains=[
-            r"(exclusivamente|apenas|somente|so)\b.{0,25}instrumentos"
+            r"\b(exclusivamente|apenas|somente|so)\b.{0,25}instrumentos"
             r"|nao (vendemos|trabalhamos com|comercializamos)"
         ],
         absent=[r"parceir"],
@@ -200,7 +258,7 @@ CASES = [
         "CA-13",
         ["Me passa uma receita de bolo de cenoura?"],
         no_calls=True,
-        absent=[r"farinha"],
+        absent=[r"farinha|trigo|acucar|ovos?\b|forno|xicara|fermento"],
     ),
     Case(
         "seguimento-pix",

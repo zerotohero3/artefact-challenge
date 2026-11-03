@@ -167,7 +167,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   → *Verificação:* `ls examples/*.md | wc -l` devolve 5 (ou 3); cada arquivo mostra as consultas; o
   exemplo de devolução mostra `get_order` e `read_policy`.
 
-- [ ] **T-21 · Commit e push da Fase 4**
+- [x] **T-21 · Commit e push da Fase 4**
   → *Verificação:* verificação completa com saída 0; `git status` limpo; push feito.
 
 - [ ] **T-22 · Aceite manual** *(executado por: o dono)* (CA-16)
