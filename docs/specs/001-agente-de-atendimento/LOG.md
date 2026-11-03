@@ -101,3 +101,106 @@ O dono aprovou a spec ("1. aprovo.") e respondeu às questões:
 - `.env`: "crie o .env que eu só colo a chave no arquivo depois." Criado na raiz com
   `GOOGLE_API_KEY=` vazio e permissão 600, ignorado pelo git (`git check-ignore`).
 - Execução: "executo em outra sessao a spec." A spec é commitada sozinha, antes do código.
+
+## 2026-11-02 — Execução, Fase 0
+
+**Retomada (22:57).** Estado real igual ao STATUS: só a spec commitada (`62b7747`), árvore limpa,
+`uv` ausente. A chave já estava no `.env` (`grep -c '^GOOGLE_API_KEY=.' .env` → 1;
+`git check-ignore .env` → `.env`), então a T-02 está cumprida pelo dono. A revisão para execução
+não achou divergência entre design e código, porque ainda não há código; as divergências da API do
+framework estão abaixo.
+
+**T-01.** `uv` 0.13.6 instalado no usuário pelo instalador oficial (`~/.local/bin`, sem mexer no
+PATH, que já o tinha). `uv python find 3.12` falhou antes de `uv python install 3.12`; depois,
+CPython 3.12.16 gerenciado pelo uv.
+
+**T-03 (23:00).** Script descartável fora do repositório, chave enviada só por cabeçalho:
+- `gemini-2.5-flash-lite` → 404: "This model models/gemini-2.5-flash-lite is no longer available to
+  new users. Please update your code to use models/gemini-3.5-flash-lite".
+- `gemini-3.1-flash-lite` → 200, respondeu "ok" (8 tokens).
+- **Modelo padrão pela regra de D-13: `gemini-3.1-flash-lite`.** A listagem de modelos da chave
+  inclui `gemini-3.5-flash-lite`, o próximo da escada de P-07.
+- **Limites: não obtidos.** As respostas não trazem cabeçalho de limite; a página de limites do AI
+  Studio (consultada agora) diz que os limites são por projeto, variam por modelo e "can be viewed
+  in Google AI Studio", sem publicar números do plano gratuito; o RPD zera à meia-noite do
+  Pacífico. O painel exige o login do dono. Não estourei a cota de propósito para ler o limite no
+  erro 429 (Q-02: "só não abusar"). Se um 429 aparecer, os detalhes do erro trazem o limite
+  violado e ele entra aqui.
+- **Orçamento estimado sem o limite diário:** uma pergunta com uma consulta custou 2 requisições e
+  ≈ 370 tokens de entrada com instruções mínimas (T-04); com a persona e o sumário, a estimativa é
+  de 2 a 3 mil tokens por requisição. Uma execução completa da avaliação (18 casos, 24 mensagens)
+  ≈ 50 a 70 requisições. Quantas cabem por dia fica sem resposta até haver o RPD.
+
+**T-04 (23:00–23:02).** PydanticAI 2.65.0 com `gemini-3.1-flash-lite`, ferramenta falsa
+`get_price` e três perguntas em português. As duas primeiras tentativas caíram já na primeira
+pergunta com **503 UNAVAILABLE** ("This model is currently experiencing high demand"); uma chamada
+crua logo depois respondeu 200, e a terceira tentativa passou nas três:
+- "Quanto custa o violão Takamine GD20?" → `get_price(product='violão Takamine GD20')` → "custa
+  R$ 2.199,00".
+- "Qual é o preço do Yamaha C40?" → `get_price(product='Yamaha C40')` → "R$ 599,00".
+- "Me fala o valor do ukulele Ohana CK-20, por favor." → `get_price(product='ukulele Ohana CK-20')`
+  → "R$ 439,20".
+RS-01 não se confirmou. O 503 transitório mostra que a falha do provedor é real e frequente, o que
+reforça a R-14 e entra no RS-02.
+
+**T-05.** `pydantic-ai-slim[google]` instalado resolveu para **2.65.0** (google-genai 2.34.0),
+versão maior que a documentação lida na especificação. Conferido por script offline:
+- `@agent.instructions` com `RunContext[Deps]` funciona; `FunctionModel` recebe as instruções da
+  execução em `AgentInfo.instructions` ("Hoje é 02/11/2026.").
+- `Agent.override(model=FunctionModel(...))`, `run_sync(..., message_history=...)`,
+  `all_messages()` e `new_messages()` funcionam; `ToolCallPart` traz `tool_name` e `args`.
+- **Construir `Agent('google:...')` sem `GOOGLE_API_KEY` levanta `UserError`.** Com
+  `defer_model_check=True` a construção passa e o erro só vem na execução. É o que o design
+  precisava responder ("como evitar que construir o agente exija a chave").
+- `models.ALLOW_MODEL_REQUESTS = False` bloqueia a requisição real com `RuntimeError` ("Model
+  requests are not allowed"), mas só depois de o provedor ser criado: sem chave, o erro que aparece
+  é o da chave.
+- Os nomes das ferramentas registradas aparecem por API pública em `AgentInfo.function_tools`
+  (útil para CA-06 sem atributo privado).
+- **A 2.x imprime um banner no primeiro `run` do processo** num terminal; ele é suprimido sob o
+  pytest, em CI e com `pydantic_ai.BANNER_ENABLED = False`. A CLI precisa desligá-lo.
+- `result.usage` virou propriedade (`.usage()` emite `PydanticAIDeprecationWarning`).
+- Erro do modelo: o 503 chega como `pydantic_ai.exceptions.ModelUnavailableError`; um erro
+  levantado dentro do `FunctionModel` propaga sem embrulho.
+Design atualizado: ponto de partida (versão e fatos acima), D-13 (padrão decidido) e RS-02 (503).
+
+## 2026-11-02 — Execução, Fase 1
+
+**T-06.** `pyproject.toml` (sem `authors`: o modelo do `uv init` punha o e-mail pessoal),
+`.python-version` 3.12, `.env.example` com o padrão `google:gemini-3.1-flash-lite`,
+`src/emporio/__init__.py`. Lock: pydantic-ai-slim 2.65.0, ruff 0.17.3, pytest 9.2.0. O ruff 0.17
+checa e formata também `docs/specs/check_spec.py` (cópia do verificador da convenção) e os blocos
+Python dentro do `design.md`; `docs` saiu do ruff (`extend-exclude`), porque é documentação do
+processo, não código do produto. `uv sync`, `ruff check` e `ruff format --check` com saída 0;
+`uv run pytest` sai com 5 (nenhum teste coletado, esperado antes da T-07). Dados copiados para
+`data/` com nomes curtos; SHA-256 dos originais, iguais aos das cópias:
+
+```
+7a7901e16c8c6357a956031ada45a6fd6a4cc9bd7bc1edc05448cc55b01b0a9e  categories.csv
+1cd724dc86eac6258913cc890abf23d3893c57a99c9325ebfb91dfad3c7b0f37  customers.csv
+7656eb681821d48e0c932f61d3188309b955c25446578235f2d8e69604b0f0bc  order_items.csv
+deb9c2480605d8d22117d569f0045fd156c5e9a58ffeebb847ff61b3b9512fd5  orders.csv
+78d911d96ee891abb163b6c858e895025aa530ab27d0290540f05d5098377c12  products.csv
+cbe08c7e91b00437c0c00a7ef1486deba73de52d23e3f97f51a7dbd557d759e0  promotions.csv
+b7527f96896929f4ba929de117651c6717e25b7a3b92b34bc54d5ba32f6156f7  politicas_da_loja.pdf
+```
+
+**T-07 — vermelho.** `tests/test_store.py` com os valores da spec §4, contra `store.py` em
+esqueleto (busca vazia, pedido não encontrado, parcelamento vazio). Primeira rodada: 31 falhas e
+1 aprovação; 4 falhas eram `KeyError` (acesso a campo de pedido e de produto antes de conferir que
+veio) e o teste de sufixo curto de telefone passava contra o esqueleto, porque só conferia a recusa.
+Ajuste: cada teste confere primeiro que o pedido ou o produto veio, e o teste do sufixo passou a
+cobrir a fronteira dos dois lados (8 dígitos aceito, 7 recusado). Segunda rodada:
+**32 falhas, todas `AssertionError`**, pelo motivo esperado (esqueleto sem dado).
+Além dos CA, entraram dois testes do contrato da busca (D-09): faixa de preço sobre o preço final
+(entre R$ 1.900 e R$ 2.000 só o Crafter HT-100, R$ 1.967,18 com a promoção; o Yamaha APX600 de
+R$ 1.899,00 fica fora) e categoria desconhecida listando as válidas.
+
+**T-08 — verde.** `src/emporio/store.py`: 32 testes passando; `ruff check` e
+`ruff format --check` limpos. Conferido por comando além dos testes: entre os 65 produtos, só
+135, 137, 139, 140, 142 e 144 perdem a descrição (D-17); promoções ativas e parcelamentos batem
+com os números calculados na especificação (Kalani R$ 323,10; Crafter R$ 1.967,18; Taylor
+R$ 5.519,08; 429,90 → 5x 85,98; 439,20 → 5x 87,84; 11.499,00 → 12x 958,25); a busca por
+"violões" com teto de R$ 1.000 só entre disponíveis também dá 12. Escolhas locais: a busca devolve
+os itens empatados em preço por id; `days_since_estimated_delivery` e `estimated_delivery` vêm
+`null` quando não há previsão, para o formato do objeto não variar.

@@ -1,6 +1,6 @@
 # Design 001 — Agente de atendimento
 
-> **Implementa:** [spec.md](spec.md) · **Atualizado em:** 2026-11-02
+> **Implementa:** [spec.md](spec.md) · **Atualizado em:** 2026-11-02 (Fase 0 conferida)
 
 ## 1. Ponto de partida
 
@@ -17,9 +17,9 @@ preços e de modelos do Google AI Studio e as páginas de modelos Google e de te
 | Dados em `data/*.csv` (enunciado) | Seis CSVs UTF-8 nomeados `desafio_tecnico_ai_eng - <tabela>.csv`; `specs` dos produtos é JSON válido em duas grafias (com e sem espaço) | `file`, `json.loads` em todas as linhas |
 | Manual com seções numeradas | 28 títulos numerados (1 a 10, com subseções) em texto extraível; tabelas viram linhas de texto | `pdftotext -layout` + `grep` dos títulos |
 | Manual ≈ tamanho | 1.753 palavras (≈ 2 a 3 mil tokens, estimativa) | `wc -w` na extração |
-| `gemini-2.5-flash-lite` é o mais barato | É (US$ 0,10 / 0,40 por milhão), mas a página de modelos diz que o acesso é "limitado a quem já usava os modelos 2.5": chave nova provavelmente não tem. O mais barato para chave nova com plano gratuito é `gemini-3.1-flash-lite` (US$ 0,25 / 1,50) | Páginas de preços e modelos do AI Studio; **a conferir com a chave do dono (T-03)** |
-| Limites do plano gratuito | Não publicados na documentação; só no painel do AI Studio, por projeto | Página de limites do AI Studio; **a conferir (T-03)** |
-| PydanticAI fala com o Gemini do AI Studio | Pacote `pydantic-ai-slim[google]`, modelo `google:<id>`, chave em `GOOGLE_API_KEY`; testes com `FunctionModel`/`TestModel`, `Agent.override` e `ToolCallPart` | Documentação do PydanticAI; **versão e API a conferir (T-05)** |
+| `gemini-2.5-flash-lite` é o mais barato | É (US$ 0,10 / 0,40 por milhão), mas a chave nova do dono recebe 404 ("no longer available to new users"). `gemini-3.1-flash-lite` (US$ 0,25 / 1,50) responde; o 503 "high demand" aparece de forma transitória | Páginas de preços e modelos do AI Studio; chamada com a chave do dono (T-03, T-04) |
+| Limites do plano gratuito | Não publicados: a página de limites diz que são por projeto, variam por modelo e ficam no painel do AI Studio; RPD zera à meia-noite do Pacífico. As respostas da API não trazem cabeçalho de limite | Página de limites do AI Studio e cabeçalhos das respostas (T-03); o painel exige o login do dono |
+| PydanticAI fala com o Gemini do AI Studio | Versão 2.65.0 (google-genai 2.34.0). Modelo `google:<id>`, chave em `GOOGLE_API_KEY`; `@agent.instructions` com `RunContext`, `FunctionModel` (com `AgentInfo.instructions` e `AgentInfo.function_tools`), `Agent.override`, `message_history`, `all_messages()` e `ToolCallPart` funcionam. Construir o agente sem a chave levanta `UserError`, salvo com `defer_model_check=True`. O primeiro `run` do processo imprime um banner num terminal, desligado por `pydantic_ai.BANNER_ENABLED = False`. O 503 chega como `ModelUnavailableError` | Script offline e com o modelo real (T-04, T-05) |
 | Ambiente de desenvolvimento | Python 3.14.4 no sistema; `uv` não instalado; `gh` autenticado como `zerotohero3` | `python3 --version`, `which uv`, `gh auth status` |
 
 Achados de dados que mudam o desenho (detalhes na spec §1): promoção inativa no produto do
@@ -194,9 +194,11 @@ execuções.
 ### D-13 · Configuração por variável de ambiente, `.env` carregado pela CLI — vigente
 
 `GOOGLE_API_KEY` (obrigatória para modelos Google), `EMPORIO_MODEL` e `EMPORIO_NOW` (data e hora
-ISO, horário de Campo Grande, opcional). O padrão de `EMPORIO_MODEL` sai da T-03: se a chave nova
-do dono acessa o `gemini-2.5-flash-lite`, ele é o padrão (o mais barato, e a prova de que chave
-nova tem acesso); senão, `gemini-3.1-flash-lite`. A partir daí vale P-07, na ordem de preço. A CLI carrega `.env` com `python-dotenv`; `.env.example` documenta as
+ISO, horário de Campo Grande, opcional). O padrão de `EMPORIO_MODEL` é
+`google:gemini-3.1-flash-lite`: a T-03 mostrou que a chave nova do dono não acessa o
+`gemini-2.5-flash-lite` (404). A partir daí vale P-07, na ordem de preço (o próximo listado para a
+chave é o `gemini-3.5-flash-lite`). O agente é construído com `defer_model_check=True`, para que
+importar e testar o código não exija a chave. A CLI carrega `.env` com `python-dotenv`; `.env.example` documenta as
 três.
 **Alternativas consideradas:** `uv run --env-file` (mais um detalhe para o avaliador errar).
 **Confirmação:** CA-15; `.env` no `.gitignore`.
@@ -475,7 +477,7 @@ Cada fase termina com suíte e lint verdes, commit e push.
 | # | Risco | Probabilidade | Mitigação |
 |---|---|---|---|
 | RS-01 | O modelo mais barato erra a escolha de consulta ou as regras em PT-BR | média | conferência na Fase 0 (T-04); regras críticas no código; avaliação; P-07 |
-| RS-02 | Limite do plano gratuito (por minuto ou por dia) interrompe avaliação ou exemplos | média | T-03 anota os limites e calcula o orçamento (uma execução da avaliação ≈ 18 casos × 2 a 4 requisições); execução sequencial; ao estourar o limite por minuto, espaçar as chamadas; ao estourar o diário, P-07 (spec §5) |
+| RS-02 | Limite do plano gratuito (por minuto ou por dia) ou indisponibilidade do provedor interrompe avaliação ou exemplos | média | Limites não publicados (T-03); uma execução da avaliação ≈ 50 a 70 requisições; execução sequencial; ao estourar o limite por minuto, espaçar as chamadas; ao estourar o diário, P-07 (spec §5). O 503 transitório já apareceu (2 de 3 tentativas na T-04): falha do provedor na avaliação é registrada como falha de ambiente, separada de falha do agente, e o caso é repetido |
 | RS-03 | API do PydanticAI diferente da documentação lida | baixa | T-05, com a versão fixada no lock |
 | RS-04 | Prazo (até 2026-11-03 23:59) | alta | fases entregam valor isolado; horários de corte em 2026-11-03 (tasks, "Antes de começar"); ao passar de um corte: exemplos de 5 para 3, ajuste da avaliação limitado a 3 rodadas, e caso que não passar vira limitação registrada no README, sem afrouxar o caso |
 | RS-05 | Caso de avaliação instável | média | checagem sobre fato, não redação; caso que falha é repetido 3 vezes para separar instabilidade de defeito; **nunca se afrouxa um caso para passar** |

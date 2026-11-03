@@ -34,16 +34,16 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 0 — Derrubar premissas
 
-- [ ] **T-01 · Ferramental**
+- [x] **T-01 · Ferramental**
   Instalar o `uv` no usuário e confirmar o Python 3.12 gerenciado por ele.
   → *Verificação:* `uv --version` e `uv python find 3.12` respondem; versões no LOG.
 
-- [ ] **T-02 · Chave do dono** *(executado por: o dono)*
+- [x] **T-02 · Chave do dono** *(executado por: o dono)*
   O `.env` foi criado na raiz em 2026-11-02 com `GOOGLE_API_KEY=` vazio; o dono cola a chave.
   → *Verificação:* `grep -c '^GOOGLE_API_KEY=.' .env` devolve 1 e `git check-ignore .env` lista o
   arquivo; a chave não é impressa.
 
-- [ ] **T-03 · Acesso ao modelo e limites** (RS-06, RS-02, D-13)
+- [~] **T-03 · Acesso ao modelo e limites** (RS-06, RS-02, D-13)
   Em script descartável fora do repositório, uma mensagem para `gemini-2.5-flash-lite` e outra para
   `gemini-3.1-flash-lite`, com a chave do dono. Anotar qual responde, o erro do outro e os limites
   por minuto e por dia de cada um (resposta da API, cabeçalhos ou painel do AI Studio), e se a cota
@@ -51,13 +51,13 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   → *Verificação:* resultado, modelo padrão escolhido pela regra de D-13 e orçamento no LOG.
   *Se nenhum dos dois responder:* pare e fale com o dono.
 
-- [ ] **T-04 · Function calling em PT-BR** (RS-01)
+- [x] **T-04 · Function calling em PT-BR** (RS-01)
   Mesmo script descartável: agente PydanticAI no modelo padrão, com uma ferramenta falsa de preço e
   três perguntas em português.
   → *Verificação:* nas 3 perguntas o modelo chama a ferramenta e responde em português com o valor
   devolvido; anotado no LOG. *Se cair:* aplique P-07 antes da Fase 1.
 
-- [ ] **T-05 · API do PydanticAI**
+- [x] **T-05 · API do PydanticAI**
   Com a versão instalada, conferir: instruções dinâmicas com `deps`, `FunctionModel`,
   `Agent.override`, `message_history` e `all_messages()`, `ToolCallPart`,
   `models.ALLOW_MODEL_REQUESTS` e como evitar que construir o agente exija a chave.
@@ -65,7 +65,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 1 — Projeto, dados e regras da loja
 
-- [ ] **T-06 · Esqueleto do projeto**
+- [x] **T-06 · Esqueleto do projeto**
   `pyproject.toml` (dependências `pydantic-ai-slim[google]` e `python-dotenv`; dev `pytest` e
   `ruff`; entrada `emporio`; `testpaths = ["tests"]`), `.python-version`, `.env.example` com o
   modelo padrão da T-03, `src/emporio/__init__.py`, comandos do `AGENTS.md` conferidos, e a cópia
@@ -73,12 +73,12 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   → *Verificação:* `uv sync` e `uv run ruff check` com saída 0; SHA-256 de cada arquivo de `data/`
   igual ao do original, com os hashes no LOG.
 
-- [ ] **T-07 · Testes da `Store` antes do código** (CA-01, CA-02, CA-03, CA-04, CA-05, CA-07, CA-20)
+- [x] **T-07 · Testes da `Store` antes do código** (CA-01, CA-02, CA-03, CA-04, CA-05, CA-07, CA-20)
   Saída: `tests/test_store.py`, com `store.py` em esqueleto (métodos devolvendo vazio). Os valores
   esperados são os da spec §4, sem recalcular.
   → *Verificação:* vermelho por asserção (não por import), motivo anotado no LOG.
 
-- [ ] **T-08 · Implementar a `Store`**
+- [x] **T-08 · Implementar a `Store`**
   Arquivo: `src/emporio/store.py` (D-04, D-05, D-06, D-09, D-10, D-17).
   ⚠️ O total do pedido é o gravado; não some os itens. ⚠️ Status vale mais que estoque.
   → *Verificação:* T-07 verde; verificação completa com saída 0.
