@@ -200,22 +200,22 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   passo**.
   → *Verificação:* cada documento da tabela "mudou X → confira Y" revisado.
 
-- [ ] **T-27 · Commit e push**
+- [x] **T-27 · Commit e push**
   Mensagem referenciando `docs/specs/001-agente-de-atendimento/spec.md`.
   → *Verificação:* `git status` sem pendência; `git log origin/main -1` igual ao local.
 
-- [ ] **T-28 · Conferência pública** (CA-19)
+- [x] **T-28 · Conferência pública** (CA-19)
   `gh repo view --json visibility` = PUBLIC; clone por HTTPS sem credencial numa pasta temporária,
   seguindo só o README.
   → *Verificação:* `uv sync`, `uv run pytest` e uma mensagem pela CLI funcionam. *Se falhar:*
   corrija, repita T-25 a T-28 e registre.
 
-- [ ] **T-29 · STATUS final e índice**
+- [x] **T-29 · STATUS final e índice**
   STATUS reescrito como resumo final, com o resultado da T-28; índice de specs atualizado.
   → *Verificação:* `python3 docs/specs/check_spec.py --all docs/specs` sem erro e o estado do
   índice igual ao do STATUS.
 
-- [ ] **T-30 · Commit e push final**
+- [x] **T-30 · Commit e push final**
   Até 23:30 de 2026-11-03.
   → *Verificação:* `git status` limpo; `git log origin/main -1` igual ao local; nenhum commit
   depois disso.

@@ -1,11 +1,20 @@
 # STATUS 001 — Agente de atendimento
 
-**Estado:** em execução · **Atualizado em:** 2026-11-03
-**Progresso:** 25/31 tarefas · **Fase atual:** 5 — validação e fechamento (aceite manual pendente)
-**Próximo passo:** T-27 (commit e push), T-28 (conferência pública: clone sem credencial e uma mensagem pela CLI).
+**Estado:** implementada · **Atualizado em:** 2026-11-03
+**Progresso:** 29/31 tarefas · **Fase atual:** 5 — fechada, falta o aceite do dono
+**Próximo passo:** o dono faz o aceite manual (roteiro abaixo, T-22) e envia o link (T-31). Aprovado, a spec vai a `concluída` num commit pequeno, se ainda antes das 23:59 de 2026-11-03.
 **Bloqueios:** nenhum.
 **Aceite pendente:** CA-16 (manual, dono).
-**Último estado verificado:** `ruff check` 0, `ruff format --check` 0, `pytest` 0 (75 aprovados, 0 falhas, 0 pulados); avaliação 10 e 11 com 18/18; `check_spec.py` sem erro · 2026-11-03 00:51
+**Último estado verificado:** `282a493` publicado e conferido por clone público; `ruff check` 0, `ruff format --check` 0, `pytest` 0 (75 aprovados); avaliação 10 e 11 com 18/18 · 2026-11-03 00:51
+
+## Resultado
+
+O agente de atendimento da Empório da Música está publicado em
+https://github.com/zerotohero3/artefact-challenge: quatro consultas fechadas (catálogo, pedido com
+verificação do titular, manual por seção, encaminhamento), regras de dinheiro, data, horário e
+privacidade no código, persona com as fontes da verdade, CLI, 75 testes offline e uma avaliação de
+18 casos com o modelo real que passou em duas execuções seguidas com a versão final. O modelo
+padrão é o `gemini-3.5-flash-lite` (P-07), porque o `gemini-3.1-flash-lite` não passou.
 
 ## Roteiro do aceite manual (T-22, CA-16)
 
@@ -28,21 +37,18 @@ que ajustar); pedido de ajuste vira uma fase de revisão no `tasks.md`.
 
 ## Como retomar
 
-Fases 0 a 3 feitas (LOG, 2026-11-02). Avaliação até agora: 01 18/18, 02 17/18, 03 (repetições de
-`esgotado`) 1/3, 04 16/18, 05 15/18, 06 15/18 (3.1, com fabricação de preço), 07 17/18 (3.5); cada falha e cada ajuste estão no LOG. Modelo padrão: `google:gemini-3.5-flash-lite` (P-07). A avaliação
-roda com `uv run pytest evals -v` e cada execução vai para
-`evidence/evals-NN-<modelo>.txt` (a `evals-00-esqueleto-...` é o vermelho da T-15 e não conta).
-Falha transitória do provedor é repetida pelo executor e impressa como "falha de ambiente". Estado
-real: `git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de corte em tasks.md,
-"Antes de começar".
+Tudo que a spec pede está feito, menos o aceite do dono (CA-16) e o envio do link (T-31). Se o
+aceite pedir ajuste: nova fase "Revisão de 2026-11-03" no `tasks.md`, verificação completa, e
+avaliação de novo só se o ajuste puder afetá-la (duas execuções seguidas, gravadas em
+`evidence/`). Nada entra no repositório depois de 2026-11-03 23:59. Estado real: `git log
+--oneline` e `git status`.
 
 ## Lacunas
 
 - **T-03 `[~]`: limite diário do plano gratuito não conhecido.** O limite por minuto apareceu no
-  detalhe do 429 durante a avaliação: 15 requisições por minuto, por modelo (`gemini-3.1-flash-lite`
-  e `gemini-3.5-flash-lite`). O diário não aparece na API nem na documentação; só no painel do AI
-  Studio, que exige o login do dono. Uma execução completa da avaliação faz cerca de 50 a 70
-  requisições e esbarra no limite por minuto, que o executor absorve com espera.
+  detalhe do 429: 15 requisições por minuto, por modelo. O diário só aparece no painel do AI
+  Studio, que exige o login do dono. As 11 execuções da avaliação e os exemplos não esbarraram
+  nele.
 
 ## Critérios de aceite
 
@@ -63,29 +69,50 @@ real: `git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de 
 | CA-13 | ✅ validado com o modelo real | execuções 10 e 11, 6/6 do grupo em cada | feriados (o manual não os lista); protocolo órfão quando o provedor falha no meio do turno |
 | CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca); `test_model_error_warns_and_the_conversation_goes_on` com HTTP, 503, 429 e conexão; Ctrl-C durante a resposta encerra limpo | o 503 e o 429 reais foram vistos na avaliação, não na CLI |
 | CA-15 | ✅ testado | `test_model_comes_from_the_environment` no agente e na CLI (mutação M14 pega) | — |
-| CA-16 | ⬜ | — | — |
-| CA-17 | ✅ por comando | `grep -c '^## <título>$' README.md` → 1 para cada um dos 8 títulos; `ls examples/*.md \| wc -l` → 5, gerados por execução real; `git log --oneline`: commits das Fases 1 a 4 (o da 5 vem no fechamento) | qualidade do texto do README (leitura do dono) |
-| CA-18 | ✅ por comando | SHA-256 dos 6 CSVs e do PDF em `data/` iguais aos originais da pasta do enunciado, depois da suíte, de 9 execuções da avaliação e dos exemplos (2026-11-03 00:30); `git status data/` limpo | — |
-| CA-19 | ⬜ | — | — |
+| CA-16 | ⬜ aceite do dono pendente | roteiro acima, entregue em 2026-11-03 | — |
+| CA-17 | ✅ por comando | `grep -c '^## <título>$' README.md` → 1 para cada um dos 8 títulos; `ls examples/*.md \| wc -l` → 5, gerados por execução real; `git log --oneline`: commits de todas as fases (Fase 1 `62172c3`, 2 `14f5a8f`, 3 `1518447`, 4 `1febea0` e `4ffe476`, 5 `282a493`), mais os de correção | qualidade do texto do README (leitura do dono) |
+| CA-18 | ✅ por comando | SHA-256 dos 6 CSVs e do PDF em `data/` iguais aos originais da pasta do enunciado, depois da suíte, das 11 execuções da avaliação e dos exemplos (conferido de novo em 2026-11-03 00:51); `git status data/` limpo | — |
+| CA-19 | ✅ validado no repositório público | 2026-11-03 00:51: `gh repo view --json visibility` → PUBLIC; clone por HTTPS com `GIT_TERMINAL_PROMPT=0` e sem credential helper, no `282a493`; seguindo só o README: `uv sync` ok, `uv run pytest` 75 aprovados, `uv run emporio --show-tools` respondeu o horário consultando `read_policy(sections=['2'])` | sistemas além do Linux do dono (Windows e macOS não testados) |
 | CA-20 | ✅ testado | `test_description_with_another_brand_is_hidden`; por comando, só os 6 produtos entre os 65 | marca fora da lista de D-17 |
 | CA-21 | ✅ por comando | `git grep -nE "open\(\|write_text\|write_bytes" -- src` → só `src/emporio/handoff.py:24` | gravação feita por dependência; `scripts/generate_examples.py` grava `examples/` (fora de `src`, só quando rodado à mão) |
 
 ## Desvios do design
 
-Nenhum. A Fase 0 completou o design sem contrariar decisão: D-13 ganhou o modelo padrão e o
-`defer_model_check`; o ponto de partida e o RS-02 ganharam os fatos da T-03 a T-05.
+Nenhuma decisão foi contrariada sem registro; as revisões estão no design, com data e motivo:
+
+- D-07 (revisada em 2026-11-03): o contexto do momento traz se a loja está aberta ou quando abre,
+  calculado no código, porque os dois modelos inventavam o horário de reabertura.
+- D-08 (revisada em 2026-11-03): o encaminhamento exige um contato válido, não só não vazio.
+- D-13 (revisada em 2026-11-03): modelo padrão `gemini-3.5-flash-lite`, pela P-07.
+- Design §4 (revisado em 2026-11-03): casos da avaliação endurecidos depois da segunda revisão e
+  `endereco-horario` corrigido por reprovar resposta certa.
+- Manual curado: a regra de até 3x passou a dizer "parcela mínima de R$ 50,00", aplicação da P-01.
+
+## Aprendizados
+
+- O modelo barato acerta o que é conferido e escorrega no resto: só a leitura completa das
+  respostas achou a paráfrase errada da regra de parcelas e o rastreio atribuído à Jadlog.
+- Ajuste de prompt para um caso pode soltar outro, e chegou a induzir fabricação de preço: a
+  escada de modelo combinada antes (P-07) evitou trocar de modelo por impulso.
+- Regra que depende de data ou conta vai para o código (horário da loja), mesmo quando parece
+  simples de deduzir.
+- Caso de avaliação também tem defeito: dois reprovavam resposta certa e vários aprovavam
+  resposta errada; endurecer conferindo contra respostas reais já gravadas evita os dois.
+- Horário em LOG se mede com `date`; estimado, ele saiu errado e foi corrigido.
 
 ## Achados registrados, não corrigidos
 
-As inconsistências dos dados da loja (spec §1) não são defeitos do agente: vão para o README,
-seção de tratamento dos dados, como reportadas à loja.
+As inconsistências dos dados da loja (spec §1) não são defeitos do agente: estão no README, seção
+"Tratamento dos dados", como reportadas à loja.
 
 | # | Achado | Registrado em |
 |---|---|---|
-| A-01 | Busca por marca traz marca de nome parecido ("Kala" → Kalani) e modelo de nome contido ("Martin D-28" → D-28E) | design D-09 (custo aceito); README, limitações (T-23) |
-| A-02 | Telefone informado com o 0 de longa distância é recusado como pedido não encontrado | design D-05 (custo aceito); README, limitações (T-23) |
+| A-01 | Busca por marca traz marca de nome parecido ("Kala" → Kalani) e modelo de nome contido ("Martin D-28" → D-28E) | design D-09 (custo aceito); README, limitações |
+| A-02 | Telefone informado com o 0 de longa distância é recusado como pedido não encontrado | design D-05 (custo aceito); README, limitações |
+| A-03 | Protocolo órfão: encaminhamento gravado e falha do provedor antes da resposta; o cliente não recebe aquele protocolo e, ao repetir, gera outro | LOG (revisão das Fases 2 a 4); README, limitações |
+| A-04 | Feriados: o contexto diz "loja aberta" num feriado (o manual não lista os feriados) | spec §6 (fora de escopo); README, limitações |
 
-## Riscos em aberto
+## Fora de escopo, com destino
 
-RS-02 (limites desconhecidos e 503 transitório) e RS-04 (prazo). RS-01 e RS-06 não se confirmaram
-na Fase 0; RS-03 virou fato conhecido (API 2.x conferida).
+Integração com WhatsApp, API, persistência do histórico, rastreio real, frete por CEP, busca
+tolerante a erro de digitação e juiz de tom: README, "Limitações conhecidas" e "Com mais tempo".

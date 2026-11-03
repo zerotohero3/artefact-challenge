@@ -568,3 +568,15 @@ manual (4 correções), design (data do cabeçalho, D-08 com a regra de contato,
 tabela de arquivos). Contagens por comando como último passo (00:51): 75 testes, 5 exemplos, 28
 seções, SHA-256 dos 7 arquivos de `data/` iguais aos do LOG, nada proibido no índice do git;
 `check_spec.py` sem erro nem aviso.
+
+**T-27 (00:51).** `282a493` publicado; `git status` limpo; `origin/main` igual ao local.
+**T-28, conferência pública (00:51), CA-19:** `gh repo view --json visibility` → `PUBLIC`; clone por
+HTTPS numa pasta temporária com `GIT_TERMINAL_PROMPT=0`, `GIT_ASKPASS=/bin/false` e sem credential
+helper; seguindo só o README: `uv sync` ok, `.env` a partir do `.env.example` com a chave do dono
+(não impressa), `uv run pytest` 75 aprovados, `uv run emporio --show-tools` respondeu "Qual o
+horário de funcionamento da loja?" consultando `read_policy(sections=['2'])`, com "retornamos
+amanhã às 09:00". `git status` do clone limpo (o `.env` é ignorado); o clone foi apagado em
+seguida, e nenhum arquivo do scratchpad guarda a chave (`grep` por "AIza").
+**T-29.** STATUS reescrito como resumo final, estado `implementada` (aceite do dono, CA-16,
+pendente); índice atualizado; `check_spec.py --all docs/specs` sem erro nem aviso.
+**T-30.** Commit e push deste fechamento, antes do corte das 23:30.
