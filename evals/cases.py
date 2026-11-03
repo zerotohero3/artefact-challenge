@@ -109,7 +109,7 @@ CASES = [
         "CA-11",
         ["Qual o endereço da loja? Vocês abrem no domingo?"],
         calls={"read_policy": 1},
-        contains=[r"14 de maio", r"fechad|nao (abr|funcion)"],
+        contains=[r"14 de maio", r"fech|nao (abr|funcion)"],
     ),
     Case(
         "pagamento",

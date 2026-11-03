@@ -30,6 +30,7 @@ def send(conversation: Conversation, message: str) -> str:
             if wait is None:
                 raise
             print(f"[falha de ambiente: {type(error).__name__}; nova tentativa em {wait}s]")
+            print(f"[detalhe: {str(error)[:600]}]")
             time.sleep(wait)
 
 

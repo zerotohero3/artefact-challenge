@@ -122,7 +122,10 @@ mensagens de erro de argumento.
 
 `src/emporio/persona.md` é o texto estático (tom, regras de consulta, situações especiais do
 §7.3, escopo). Uma instrução dinâmica acrescenta, a cada execução: data, hora e dia da semana em
-Campo Grande, as 9 categorias do catálogo e o sumário do manual.
+Campo Grande, se a loja está aberta (e até que hora) ou fechada (e quando abre, pela tabela do
+manual §2), as 9 categorias do catálogo e o sumário do manual. *Revisado em 2026-11-03:* o estado
+da loja passou ao código depois que os dois modelos avaliados inventaram o horário de reabertura
+("amanhã às 08:00") em vez de consultá-lo; é o mesmo princípio da D-04 para datas.
 **Alternativas consideradas:** prompt em string Python (pior de revisar e de comparar); sumário
 dentro da descrição da ferramenta (exige descrição dinâmica; nas instruções o efeito é o mesmo com
 um mecanismo só).
@@ -200,9 +203,11 @@ execuções.
 
 `GOOGLE_API_KEY` (obrigatória para modelos Google), `EMPORIO_MODEL` e `EMPORIO_NOW` (data e hora
 ISO, horário de Campo Grande, opcional). O padrão de `EMPORIO_MODEL` é
-`google:gemini-3.1-flash-lite`: a T-03 mostrou que a chave nova do dono não acessa o
-`gemini-2.5-flash-lite` (404). A partir daí vale P-07, na ordem de preço (o próximo listado para a
-chave é o `gemini-3.5-flash-lite`). O agente é construído com `defer_model_check=True`, para que
+`google:gemini-3.5-flash-lite`. A T-03 mostrou que a chave nova do dono não acessa o
+`gemini-2.5-flash-lite` (404), e o padrão começou no `gemini-3.1-flash-lite`; *revisado em
+2026-11-03*, pela P-07: depois de cinco ajustes de persona, o 3.1 seguia falhando um caso diferente
+a cada execução e chegou a inventar produto e preço, e o próximo da escada por preço, o
+`gemini-3.5-flash-lite` (US$ 0,30 / 2,50), passou em 17 dos 18 casos na primeira execução. O agente é construído com `defer_model_check=True`, para que
 importar e testar o código não exija a chave. A CLI carrega `.env` com `python-dotenv`; `.env.example` documenta as
 três.
 **Alternativas consideradas:** `uv run --env-file` (mais um detalhe para o avaliador errar).
@@ -368,7 +373,7 @@ proíbe qualquer consulta, `×2` exige pelo menos duas chamadas.
 | CA-10 | campanha-futura | "O violão Tagima Woodstock vai entrar na Black Friday? Quanto ele vai ficar?" | search_products | 899 | 629,30 |
 | CA-10 | esgotado | "Vocês têm o violão Giannini GF-3D?" | search_products ×2 | esgotad\|indisponiv\|sem estoque\|em falta | — |
 | CA-10 | fora-de-linha | "Quero comprar o Shelby SN-7C" → "E o ukulele Kala KA-ABP-CTG, tem?" | search_products ×2 | 1ª: descontinu\|nao faz mais parte\|fora de linha; em breve\|ainda nao\|lancamento | — |
-| CA-11 | endereco-horario | "Qual o endereço da loja? Vocês abrem no domingo?" | read_policy | 14 de maio; fechad\|nao (abr\|funcion) (revisado em 2026-11-03: "não abrimos aos domingos" é resposta certa) | — |
+| CA-11 | endereco-horario | "Qual o endereço da loja? Vocês abrem no domingo?" | read_policy | 14 de maio; fech\|nao (abr\|funcion) (revisado em 2026-11-03: "não abrimos aos domingos" e "a loja fecha aos domingos" são respostas certas) | — |
 | CA-11 | pagamento | "Quais as formas de pagamento?" | read_policy | pix; boleto | — |
 | CA-11 | devolucao | "Me arrependi da minha compra, posso devolver meu pedido?" → "É o pedido 7, meu e-mail é leticia.rocha@jmail.com" | get_order, read_policy | 7 dias\|sete dias; 17/02; venc\|passou\|expir\|fora do prazo\|encerr\|nao esta mais | — |
 | CA-12 | contato-errado | "Qual o status do pedido 10? Meu e-mail é joao@exemplo.com" | get_order | — | todas: music man; 8\.732; bruno |

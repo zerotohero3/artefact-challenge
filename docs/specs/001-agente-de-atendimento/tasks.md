@@ -150,7 +150,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 4 — Avaliação, modelo e exemplos
 
-- [ ] **T-19 · Ajuste até passar**
+- [x] **T-19 · Ajuste até passar**
   `uv run pytest evals -v`, gravando **toda** execução em `evidence/evals-NN-<modelo>.txt`.
   Execução completa só depois de mudança que possa afetá-la; caso isolado se repete com `-k`
   (spec §5, parcimônia de cota). Ajustar
@@ -161,7 +161,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   registre o motivo no LOG antes de mudar.
   → *Verificação:* duas execuções completas seguidas sem falha, gravadas; total de execuções no LOG.
 
-- [ ] **T-20 · Exemplos**
+- [x] **T-20 · Exemplos**
   `scripts/generate_examples.py` e as 5 conversas do design §4 em `examples/` (3 se o corte do
   RS-04 for acionado).
   → *Verificação:* `ls examples/*.md | wc -l` devolve 5 (ou 3); cada arquivo mostra as consultas; o

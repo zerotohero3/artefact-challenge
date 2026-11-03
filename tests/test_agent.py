@@ -19,6 +19,7 @@ from emporio.agent import (
     clock_from_env,
     load_deps,
     model_name_from_env,
+    opening_status,
 )
 
 SUNDAY_NIGHT = datetime(2026, 11, 8, 20, 0, tzinfo=CAMPO_GRANDE)
@@ -65,9 +66,24 @@ def test_instructions_bring_persona_and_moment(deps):
     instructions = seen["instructions"]
     assert "Fontes da verdade" in instructions
     assert "domingo, 08/11/2026, 20:00" in instructions
+    assert "Loja fechada agora; abre segunda-feira, 09/11/2026, às 09:00." in instructions
     for category in deps.store.category_names:
         assert category in instructions
     assert "4.1 Direito de Arrependimento (Compras Online)" in instructions
+
+
+@pytest.mark.parametrize(
+    ("moment", "expected"),
+    [
+        ((2026, 11, 3, 10, 0), "Loja aberta agora, até as 18:00."),
+        ((2026, 11, 3, 18, 0), "Loja fechada agora; abre quarta-feira, 04/11/2026, às 09:00."),
+        ((2026, 11, 7, 12, 59), "Loja aberta agora, até as 13:00."),
+        ((2026, 11, 7, 13, 0), "Loja fechada agora; abre segunda-feira, 09/11/2026, às 09:00."),
+        ((2026, 11, 9, 7, 30), "Loja fechada agora; abre segunda-feira, 09/11/2026, às 09:00."),
+    ],
+)
+def test_opening_status_follows_the_store_hours(moment, expected):
+    assert opening_status(datetime(*moment, tzinfo=CAMPO_GRANDE)) == expected
 
 
 def test_turn_reports_the_tool_calls(deps):
@@ -127,12 +143,12 @@ def test_model_failure_keeps_the_history(deps):
 
 def test_model_comes_from_the_environment(monkeypatch):
     monkeypatch.delenv("EMPORIO_MODEL", raising=False)
-    assert model_name_from_env() == "google:gemini-3.1-flash-lite"
-    assert build_agent().model == "google:gemini-3.1-flash-lite"
-
-    monkeypatch.setenv("EMPORIO_MODEL", "google:gemini-3.5-flash-lite")
     assert model_name_from_env() == "google:gemini-3.5-flash-lite"
     assert build_agent().model == "google:gemini-3.5-flash-lite"
+
+    monkeypatch.setenv("EMPORIO_MODEL", "google:gemini-3.1-flash-lite")
+    assert model_name_from_env() == "google:gemini-3.1-flash-lite"
+    assert build_agent().model == "google:gemini-3.1-flash-lite"
 
 
 def test_clock_can_be_fixed_by_the_environment(monkeypatch):

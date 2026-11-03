@@ -16,8 +16,11 @@ from emporio.store import Store
 ROOT = Path(__file__).parents[2]
 # Mato Grosso do Sul has had no daylight saving time since 2019.
 CAMPO_GRANDE = timezone(timedelta(hours=-4))
-DEFAULT_MODEL = "google:gemini-3.1-flash-lite"
+DEFAULT_MODEL = "google:gemini-3.5-flash-lite"
 PERSONA = Path(__file__).with_name("persona.md").read_text(encoding="utf-8")
+# Manual §2, by weekday (Monday = 0): opening and closing hour; closed on Sunday. The manual does
+# not list the holidays.
+OPENING_HOURS = {0: (9, 18), 1: (9, 18), 2: (9, 18), 3: (9, 18), 4: (9, 18), 5: (9, 13)}
 WEEKDAYS = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira",
             "sábado", "domingo"]  # fmt: skip
 
@@ -34,6 +37,18 @@ class Deps:
 class Turn:
     reply: str
     tool_calls: list[str]
+
+
+def opening_status(now: datetime) -> str:
+    hours = OPENING_HOURS.get(now.weekday())
+    if hours and hours[0] <= now.hour < hours[1]:
+        return f"Loja aberta agora, até as {hours[1]:02d}:00."
+    days = 0 if hours and now.hour < hours[0] else 1
+    while (now + timedelta(days=days)).weekday() not in OPENING_HOURS:
+        days += 1
+    day = now + timedelta(days=days)
+    opens = OPENING_HOURS[day.weekday()][0]
+    return f"Loja fechada agora; abre {WEEKDAYS[day.weekday()]}, {day:%d/%m/%Y}, às {opens:02d}:00."
 
 
 def model_name_from_env() -> str:
@@ -71,7 +86,7 @@ def build_agent(model: str | Model | None = None) -> Agent[Deps, str]:
         return (
             "## Contexto do momento\n\n"
             f"Agora: {WEEKDAYS[now.weekday()]}, {now:%d/%m/%Y}, {now:%H:%M} "
-            "(horário de Campo Grande/MS).\n\n"
+            f"(horário de Campo Grande/MS). {opening_status(now)}\n\n"
             f"Categorias do catálogo: {', '.join(ctx.deps.store.category_names)}.\n\n"
             f"Sumário do manual:\n{ctx.deps.policies.table_of_contents()}"
         )

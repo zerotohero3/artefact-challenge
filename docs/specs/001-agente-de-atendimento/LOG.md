@@ -396,3 +396,86 @@ e o preâmbulo lista essa quarta correção. Teste novo em `test_policies.py`, v
 mudança. Diff de palavras contra o `pdftotext`: só as correções de P-01 (seção 3, seção 3.1 e
 seção 7). É aplicação da P-01, não premissa nova, e fica destacada no relatório para o dono.
 Suíte: 57 testes, ruff limpo. Próxima: execução completa 05.
+
+**Execução 05 (00:02–00:05): 15/18**, 3 min 2 s, com 4 falhas de ambiente (3
+`ModelRateLimitError`, as primeiras 429 da sessão, e 1 `ModelUnavailableError`), todas repetidas
+com sucesso. Gravada em `evidence/evals-05-...`.
+- `esgotado`: a resposta disse "ele está esgotado no momento" (o ajuste 2 funcionou), mas
+  **ofereceu** mostrar alternativas em vez de buscá-las; uma busca só, e o caso exige duas. R-04
+  pede a sugestão. Defeito do agente.
+- `endereco-horario`: "nossa loja fecha aos domingos", correta, reprovada pela expressão
+  `fechad|nao (abr|funcion)`. **O caso continua errado**; passa a `fech|nao (abr|funcion)`. A
+  negação ("abrimos no domingo") segue reprovada. Design §4 atualizado.
+- `reclamacao`: o modelo **inventou o pedido 12345** para chamar `get_order` e pediu o número do
+  pedido antes de registrar, embora o encaminhamento não precise dele. Defeito do agente, e grave:
+  argumento inventado.
+
+**Ajuste 4, motivado por `esgotado`:** esgotado e descontinuado: na mesma resposta, buscar e
+mostrar alternativas, sem perguntar antes.
+**Ajuste 5, motivado por `reclamacao`:** nunca inventar argumento de consulta (pedido, e-mail,
+telefone); reclamação se registra com o contato, sem depender do número do pedido.
+Suíte: 57 testes, ruff limpo. Próxima: execução completa 06.
+
+**Execução 06 (00:06–00:10): 15/18**, com 2 falhas de ambiente 429. O detalhe do 429 trouxe o
+limite que a T-03 não conseguiu ler: **15 requisições por minuto** para o `gemini-3.1-flash-lite`
+no plano gratuito ("generate_content_free_tier_requests, limit: 15"). O limite diário segue
+desconhecido. Falhas:
+- `esgotado`: depois do ajuste 4, o modelo **inventou** alternativas sem consultar ("Giannini GF-1M
+  por R$ 650,00", produto que não existe; "Yamaha F310 por R$ 980,00", que custa R$ 699,90). O caso
+  pegou a fabricação pela segunda busca exigida.
+- `fora-de-linha`: a primeira resposta listou equivalentes sem dizer que o SN-7C está
+  descontinuado.
+- `fora-do-expediente`: "voltamos amanhã, dia 09/11/2026, a partir das 08:00", sem consultar o
+  horário (o certo é 09:00, e o caso pede "segunda").
+
+**Decisão: P-07.** Em seis execuções, cada ajuste da persona conserta um caso e solta outro, e o
+último induziu fabricação de preço, o pior erro possível para a loja (§7.1). Sigo a escada: o
+próximo mais barato com plano gratuito, pela página de preços consultada às 00:12, é o
+`gemini-3.5-flash-lite` (US$ 0,30 / 2,50 por milhão; o `3.1-flash-lite` custa US$ 0,25 / 1,50).
+Execução completa com ele e a persona atual, por `EMPORIO_MODEL`, sem mudar código.
+
+**Execução 07 (00:10–00:13), `gemini-3.5-flash-lite` por `EMPORIO_MODEL`: 17/18**, com 4 falhas
+de ambiente 429 (limite também de 15 por minuto para este modelo). Status antes das alternativas,
+alternativas buscadas de verdade, reclamação registrada sem pedido inventado. Falhou só
+`fora-do-expediente`: "retornamos amanhã às 08:00", sem consultar o horário, o mesmo erro do 3.1
+na 06. Observação que o caso não pega: em `fora-de-linha`, a primeira resposta termina em
+"selecionei algumas opções ... que podem te interessar:" sem a lista e sem a busca.
+
+**Horário da loja no código (D-07 revisada).** Os dois modelos inventam o horário de reabertura em
+vez de consultá-lo. O contexto do momento passa a trazer "Loja aberta agora, até as 18:00." ou
+"Loja fechada agora; abre segunda-feira, 09/11/2026, às 09:00.", calculado pela tabela do manual
+§2 (`opening_status`), e a persona manda usar esse texto. Teste parametrizado com 5 momentos
+(terça 10:00 e 18:00, sábado 12:59 e 13:00, segunda 07:30) e o texto nas instruções de domingo à
+noite: 6 vermelhos por asserção, depois verdes.
+
+**Modelo padrão: `gemini-3.5-flash-lite` (P-07, D-13 revisada).** O teste da CA-15 passou a
+esperar o novo padrão (vermelho visto, depois verde); `.env.example` atualizado. Suíte: 62
+testes, ruff limpo. As execuções seguintes usam o padrão, sem variável de ambiente.
+
+**Execução 08 (00:15–00:17), padrão `gemini-3.5-flash-lite`: 18/18**, 2 min 4 s, 3 falhas de
+ambiente 429. **Execução 09 (00:17–00:20), sem mudança desde a 08: 18/18**, 2 min 38 s, 5 falhas
+de ambiente 429. O modelo de cada execução está confirmado pelos detalhes dos erros
+(`model_name: gemini-3.5-flash-lite`). Leitura completa das respostas das duas, além das
+expressões: status antes das alternativas, alternativas buscadas e com preços do catálogo
+(conferidos à mão: PIX do GF-3D R$ 759,91, 7x de R$ 114,27), reabertura "amanhã, segunda-feira, às
+09:00", rastreio "Correios ou Jadlog", regra de parcelas sem a paráfrase errada, devolução dizendo
+que usou a previsão como data de recebimento.
+
+**T-19 cumprida:** duas execuções completas seguidas sem falha (08 e 09). Total: 9 execuções
+gravadas (01, 02, 04 a 09 completas e 03 com 3 repetições de um caso), mais a 00 do vermelho da
+T-15, que não conta. Resultado por execução: 01 18/18, 02 17/18, 03 1/3, 04 16/18, 05 15/18,
+06 15/18 (as seis com o 3.1), 07 17/18, 08 18/18, 09 18/18 (as três com o 3.5). Cinco ajustes de
+persona ou de descrição, uma regra levada ao código (horário da loja), uma troca de modelo (P-07)
+e uma correção de caso que reprovava resposta certa (`endereco-horario`, duas vezes), cada um com o
+caso que o motivou acima.
+
+**T-20 (00:21–00:22).** `scripts/generate_examples.py` ganhou a mesma repetição com espera da
+avaliação (429 e 503), porque o limite de 15 por minuto derrubaria as 5 conversas no meio. Os 5
+exemplos foram gerados com o modelo padrão e o relógio real: 02/11/2026 23:21 em Campo Grande,
+uma hora atrás de Brasília (00:21 de 03/11 no relógio do sistema), loja fechada, e a assistente diz
+que reabre "amanhã, terça-feira, 03/11, às 09:00". Lidos inteiros; fatos conferidos (258 dias desde
+17/02/2026; compra de 03/02/2026 para os 30 dias da 4.2; protocolo registrado com o e-mail já
+informado e o pedido 8). Observações: o modelo escreve "GN-15 Nylon Cedro" (no catálogo,
+"Cedr"); a recomendação para iniciante do exemplo 1 vem das descrições do resultado anterior e de
+conhecimento geral ("nylon machuca menos os dedos"), sem consulta nova. `ls examples/*.md | wc -l`
+→ 5; o exemplo 3 mostra `get_order` e `read_policy`.
