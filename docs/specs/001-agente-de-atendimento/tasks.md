@@ -178,7 +178,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 
 ## Fase 5 — Validação e fechamento
 
-- [ ] **T-23 · README**
+- [x] **T-23 · README**
   Seções, com estes títulos: "Como rodar" (ambiente, chave, comandos, troca de modelo), "Decisões
   técnicas" (framework, modelo, consultas, manual por seção, regras no código, estratégia de
   prompt, persistência), "Tratamento dos dados" (inconsistências reportadas à loja), "Premissas"
@@ -186,16 +186,16 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   mais tempo), "Uso de assistentes de código" (Claude Code e o fluxo de specs), "Exemplos".
   → *Verificação:* CA-17.
 
-- [ ] **T-24 · Percorrer os critérios de aceite**
+- [x] **T-24 · Percorrer os critérios de aceite**
   Cada CA com a evidência no STATUS, dizendo também o que ela não prova. CA-18 por `sha256sum`;
   CA-21 pela busca do design §8.
   → *Verificação:* tabela de critérios do STATUS preenchida, exceto CA-19.
 
-- [ ] **T-25 · Verificação completa**
+- [x] **T-25 · Verificação completa**
   → *Verificação:* os três comandos offline com saída 0, capturada sem pipe, e números de testes
   no STATUS.
 
-- [ ] **T-26 · Fechamento da documentação**
+- [x] **T-26 · Fechamento da documentação**
   Rodar o [checklist](../../DOC-CHECKLIST.md). Contagens conferidas por comando **como último
   passo**.
   → *Verificação:* cada documento da tabela "mudou X → confira Y" revisado.

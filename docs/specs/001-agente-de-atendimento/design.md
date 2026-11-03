@@ -1,6 +1,6 @@
 # Design 001 — Agente de atendimento
 
-> **Implementa:** [spec.md](spec.md) · **Atualizado em:** 2026-11-02 (Fase 0 conferida)
+> **Implementa:** [spec.md](spec.md) · **Atualizado em:** 2026-11-03
 
 ## 1. Ponto de partida
 
@@ -135,8 +135,9 @@ sumário.
 ### D-08 · Encaminhamento em JSON Lines local — vigente
 
 `handoff_to_staff` acrescenta uma linha em `var/handoffs.jsonl` (ignorado pelo git) e devolve o
-protocolo `EM-` seguido de 6 caracteres hexadecimais maiúsculos. Sem contato, devolve erro e não
-grava.
+protocolo `EM-` seguido de 6 caracteres hexadecimais maiúsculos. Sem contato válido (e-mail com
+domínio, ou 8 dígitos ou mais, a mesma régua da verificação de pedido), devolve erro e não grava.
+*Revisado em 2026-11-03:* antes, só o contato em branco era recusado, e "N/A" virava registro.
 **Alternativas consideradas:** SQLite (nada para consultar; a equipe leria um arquivo); e-mail ou
 webhook (sem infraestrutura no protótipo).
 **Custo aceito:** sem fila nem notificação; é o ponto de integração com o sistema real da loja.
@@ -416,7 +417,7 @@ da execução; cada turno com a fala do cliente, as consultas feitas e a respost
 | `src/emporio/handoff.py` | novo | registro de encaminhamento |
 | `src/emporio/agent.py`, `src/emporio/persona.md` | novo | agente, ferramentas, contexto do momento, `Conversation` |
 | `src/emporio/cli.py` | novo | conversa no terminal |
-| `tests/test_store.py`, `test_policies.py`, `test_handoff.py`, `test_agent.py`, `test_cli.py` | novo | suíte offline |
+| `tests/conftest.py`, `test_store.py`, `test_policies.py`, `test_handoff.py`, `test_agent.py`, `test_cli.py` | novo | suíte offline (o `conftest.py` bloqueia chamada real ao modelo) |
 | `evals/cases.py`, `evals/test_evals.py` | novo | avaliação com o modelo real |
 | `scripts/generate_examples.py`, `examples/*.md` | novo | exemplos de conversa |
 | `README.md` | novo | entrega do desafio |

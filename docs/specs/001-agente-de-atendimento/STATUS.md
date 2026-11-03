@@ -1,11 +1,11 @@
 # STATUS 001 — Agente de atendimento
 
 **Estado:** em execução · **Atualizado em:** 2026-11-03
-**Progresso:** 21/31 tarefas · **Fase atual:** 5 — validação e fechamento (aceite manual pendente)
-**Próximo passo:** commit dos achados da revisão das Fases 2 a 4; depois T-23 a T-30 (README, critérios, verificação, documentação, conferência pública).
+**Progresso:** 25/31 tarefas · **Fase atual:** 5 — validação e fechamento (aceite manual pendente)
+**Próximo passo:** T-27 (commit e push), T-28 (conferência pública: clone sem credencial e uma mensagem pela CLI).
 **Bloqueios:** nenhum.
 **Aceite pendente:** CA-16 (manual, dono).
-**Último estado verificado:** avaliação 10 e 11 com 18/18 cada, com a versão final; ruff limpo, 75 testes passando · 2026-11-03 00:49
+**Último estado verificado:** `ruff check` 0, `ruff format --check` 0, `pytest` 0 (75 aprovados, 0 falhas, 0 pulados); avaliação 10 e 11 com 18/18; `check_spec.py` sem erro · 2026-11-03 00:51
 
 ## Roteiro do aceite manual (T-22, CA-16)
 
@@ -53,16 +53,16 @@ real: `git log --oneline` e `git status`. Prazo: 2026-11-03 23:59; horários de 
 | CA-03 | ✅ testado | `test_status_prevails_over_stock` (5 produtos) | sugestão de alternativas pelo modelo (CA-10) |
 | CA-04 | ✅ testado | `test_available_guitars_up_to_1000`, `test_search_by_name` (6 consultas) | termos com erro de digitação (fora de escopo) |
 | CA-05 | ✅ testado | `test_wrong_contact_looks_like_missing_order` (contato inexistente e contato de outra cliente real: igualdade e ausência de 6 dados), `test_holder_contact_formats`, `test_phone_suffix_needs_eight_digits` | e-mail compartilhado entre clientes 11 e 43 (risco aceito) |
-| CA-06 | ✅ testado | `test_exactly_the_four_tools` (nomes exatos que chegam ao modelo) | o que o modelo diz sem consultar (CA-12, `extracao`) |
+| CA-06 | ✅ testado | `test_exactly_the_four_tools` (nomes exatos que chegam ao modelo) e os testes de ligação de cada ferramenta (busca com todos os filtros, pedido com contato de outra cliente, só a seção pedida, campos do encaminhamento); mutações M4 a M9 e M12 pegas | o que o modelo diz sem consultar (CA-12, `extracao`) |
 | CA-07 | ✅ testado | `test_order_total_is_the_recorded_one`, `test_shipped_order_past_estimate_is_late`, `test_cancelled_order_brings_the_reason` (relógio 2026-11-02) | outras datas de referência |
-| CA-08 | ✅ testado | `tests/test_policies.py` (6 testes); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10) | se o modelo consulta a seção certa (CA-11) |
-| CA-09 | ✅ testado | `tests/test_handoff.py`: linha gravada e protocolo devolvido; sem contato, erro e arquivo inexistente | concorrência (CLI de um usuário só); se o modelo encaminha quando deve (CA-13) |
+| CA-08 | ✅ testado | `tests/test_policies.py` (6 testes, incluindo a regra de 3x); 28 títulos por `grep`; diff de palavras contra o `pdftotext` só com as correções de P-01 (LOG, T-10 e Fase 4) | se o modelo consulta a seção certa (CA-11) |
+| CA-09 | ✅ testado | `tests/test_handoff.py` (8): linha gravada e protocolo devolvido; sem contato válido (vazio, "N/A", "-", telefone curto, e-mail sem domínio), erro e arquivo inexistente; `test_handoff_goes_to_the_conversation_log` no agente | concorrência (CLI de um usuário só); protocolo órfão se o provedor falha no meio do turno (limitação no README) |
 | CA-10 | ✅ validado com o modelo real | execuções 10 e 11 seguidas, com os casos endurecidos, 6/6 do grupo em cada (`evidence/evals-10-...`, `evals-11-...`); todas as 11 execuções gravadas | estabilidade além de duas execuções; qualidade de redação |
 | CA-11 | ✅ validado com o modelo real | execuções 10 e 11, 3/3 do grupo em cada | idem; `endereco-horario` revisado três vezes (LOG) |
 | CA-12 | ✅ validado com o modelo real | execuções 10 e 11, 3/3 do grupo em cada | outras formas de prompt injection além das três do caso `extracao`; resumo parafraseado das instruções |
 | CA-13 | ✅ validado com o modelo real | execuções 10 e 11, 6/6 do grupo em cada | feriados (o manual não os lista); protocolo órfão quando o provedor falha no meio do turno |
-| CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca), `test_model_error_warns_and_the_conversation_goes_on` | erros reais do provedor na CLI (vistos só na T-04, fora da CLI) |
-| CA-15 | ✅ testado | `test_model_comes_from_the_environment` | — |
+| CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca); `test_model_error_warns_and_the_conversation_goes_on` com HTTP, 503, 429 e conexão; Ctrl-C durante a resposta encerra limpo | o 503 e o 429 reais foram vistos na avaliação, não na CLI |
+| CA-15 | ✅ testado | `test_model_comes_from_the_environment` no agente e na CLI (mutação M14 pega) | — |
 | CA-16 | ⬜ | — | — |
 | CA-17 | ✅ por comando | `grep -c '^## <título>$' README.md` → 1 para cada um dos 8 títulos; `ls examples/*.md \| wc -l` → 5, gerados por execução real; `git log --oneline`: commits das Fases 1 a 4 (o da 5 vem no fechamento) | qualidade do texto do README (leitura do dono) |
 | CA-18 | ✅ por comando | SHA-256 dos 6 CSVs e do PDF em `data/` iguais aos originais da pasta do enunciado, depois da suíte, de 9 execuções da avaliação e dos exemplos (2026-11-03 00:30); `git status data/` limpo | — |

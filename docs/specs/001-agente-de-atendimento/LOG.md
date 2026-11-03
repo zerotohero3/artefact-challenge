@@ -552,3 +552,19 @@ endurecidos e o encaminhamento validado, sem mudança entre as duas; 4 e 5 falha
 absorvidas. Lidas as respostas mais sensíveis da 10 (equivalentes de 7 cordas buscados, recusa
 de dados de cliente sem vazar nada, reclamação com motivo e telefone certos e "24 horas úteis").
 **CA-10 a CA-13 revalidados com a versão final.** Total: 11 execuções gravadas.
+
+## 2026-11-03 — Fase 5, fechamento
+
+**T-23.** README com as 8 seções, contagens medidas (75 testes: 36 da `Store`, 6 do manual, 8 do
+encaminhamento, 16 do agente, 9 da CLI) e a tabela das 11 execuções da avaliação. Uma frase dizia
+que "cada teste foi visto falhar antes do código"; não vale para os testes que vieram depois, com o
+código já certo (provados por mutação), e foi reescrita assim.
+**T-24.** Critérios no STATUS com evidência e o que ela não prova; pendentes só a CA-16 (dono) e
+a CA-19 (T-28). **T-25 (00:50).** `ruff check` 0, `ruff format --check` 0, `pytest` 0: 75
+aprovados, 0 falhas, 0 pulados, 1 aviso (`DeprecationWarning` de dentro do `pydantic_graph`).
+**T-26.** Checklist percorrido: README, AGENTS.md (comando dos exemplos, `-rA` e o limite de 15 por
+minuto na avaliação, regra de evidência), `.env.example` (padrão 3.5), persona, preâmbulo do
+manual (4 correções), design (data do cabeçalho, D-08 com a regra de contato, `conftest.py` na
+tabela de arquivos). Contagens por comando como último passo (00:51): 75 testes, 5 exemplos, 28
+seções, SHA-256 dos 7 arquivos de `data/` iguais aos do LOG, nada proibido no índice do git;
+`check_spec.py` sem erro nem aviso.

@@ -11,7 +11,7 @@ uv sync                          # instala dependências (Python 3.12 via .pytho
 uv run emporio [--show-tools]    # conversa no terminal; precisa de GOOGLE_API_KEY no .env
 uv run ruff check && uv run ruff format --check
 uv run pytest                    # suíte offline; não chama o modelo
-uv run pytest evals -v           # avaliação com o modelo real; consome cota da API
+uv run pytest evals -v -rA       # avaliação com o modelo real; consome cota (15 req/min no plano gratuito)
 uv run python scripts/generate_examples.py [N ...]  # regrava os exemplos em examples/
 ```
 
@@ -25,6 +25,8 @@ uv run python scripts/generate_examples.py [N ...]  # regrava os exemplos em exa
 - Ferramentas devolvem fatos do domínio; o comportamento da conversa fica em
   `src/emporio/persona.md`.
 - Os arquivos de `data/` são cópias dos originais da loja: o código só os lê.
+- Toda execução da avaliação é gravada (inclusive as que falham) na pasta `evidence/` da spec em
+  andamento; caso de avaliação só muda com o motivo escrito antes, e nunca para afrouxar.
 
 ## Git
 
