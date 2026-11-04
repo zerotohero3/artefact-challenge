@@ -184,4 +184,4 @@ refs docs/specs/NNN-nome/spec.md
 
 | # | Spec | Tamanho | Estado | Resolve |
 |---|---|---|---|---|
-| [001](001-agente-de-atendimento/STATUS.md) | Agente de atendimento | L | implementada | — |
+| [001](001-agente-de-atendimento/STATUS.md) | Agente de atendimento | L | concluída com ressalvas | — |

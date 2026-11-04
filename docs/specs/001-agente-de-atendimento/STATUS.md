@@ -1,11 +1,11 @@
 # STATUS 001 — Agente de atendimento
 
-**Estado:** implementada · **Atualizado em:** 2026-11-03
-**Progresso:** 29/31 tarefas · **Fase atual:** 5 — fechada, falta o aceite do dono
-**Próximo passo:** o dono faz o aceite manual (roteiro abaixo, T-22) e envia o link (T-31). Aprovado, a spec vai a `concluída` num commit pequeno, se ainda antes das 23:59 de 2026-11-03.
+**Estado:** concluída com ressalvas (T-03: limite diário do plano gratuito não lido; registrado no README) · **Atualizado em:** 2026-11-03
+**Progresso:** 30/31 tarefas (T-31, o envio do link, é do dono, fora do repositório) · **Fase atual:** —
+**Próximo passo:** o dono envia o link do repositório no e-mail do processo até 23:59 de 2026-11-03; nenhum commit depois disso.
 **Bloqueios:** nenhum.
-**Aceite pendente:** CA-16 (manual, dono).
-**Último estado verificado:** `282a493` publicado e conferido por clone público; `ruff check` 0, `ruff format --check` 0, `pytest` 0 (75 aprovados); avaliação 10 e 11 com 18/18 · 2026-11-03 00:51
+**Aceite pendente:** —
+**Último estado verificado:** `ruff check` 0, `ruff format --check` 0, `pytest` 0 (75 aprovados); avaliação 10 e 11 com 18/18; CA-16 aceito pelo dono · 2026-11-03 23:42
 
 ## Resultado
 
@@ -69,7 +69,7 @@ avaliação de novo só se o ajuste puder afetá-la (duas execuções seguidas, 
 | CA-13 | ✅ validado com o modelo real | execuções 10 e 11, 6/6 do grupo em cada | feriados (o manual não os lista); protocolo órfão quando o provedor falha no meio do turno |
 | CA-14 | ✅ testado | `test_model_failure_keeps_the_history` (a 3ª chamada recebe só a 1ª troca); `test_model_error_warns_and_the_conversation_goes_on` com HTTP, 503, 429 e conexão; Ctrl-C durante a resposta encerra limpo | o 503 e o 429 reais foram vistos na avaliação, não na CLI |
 | CA-15 | ✅ testado | `test_model_comes_from_the_environment` no agente e na CLI (mutação M14 pega) | — |
-| CA-16 | ⬜ aceite do dono pendente | roteiro acima, entregue em 2026-11-03 | — |
+| CA-16 | ✅ aceito pelo dono | 2026-11-03 23:41, nas palavras dele: "pode colocar como spec concluida" | o resultado de cada passo do roteiro não foi reportado |
 | CA-17 | ✅ por comando | `grep -c '^## <título>$' README.md` → 1 para cada um dos 8 títulos; `ls examples/*.md \| wc -l` → 5, gerados por execução real; `git log --oneline`: commits de todas as fases (Fase 1 `62172c3`, 2 `14f5a8f`, 3 `1518447`, 4 `1febea0` e `4ffe476`, 5 `282a493`), mais os de correção | qualidade do texto do README (leitura do dono) |
 | CA-18 | ✅ por comando | SHA-256 dos 6 CSVs e do PDF em `data/` iguais aos originais da pasta do enunciado, depois da suíte, das 11 execuções da avaliação e dos exemplos (conferido de novo em 2026-11-03 00:51); `git status data/` limpo | — |
 | CA-19 | ✅ validado no repositório público | 2026-11-03 00:51: `gh repo view --json visibility` → PUBLIC; clone por HTTPS com `GIT_TERMINAL_PROMPT=0` e sem credential helper, no `282a493`; seguindo só o README: `uv sync` ok, `uv run pytest` 75 aprovados, `uv run emporio --show-tools` respondeu o horário consultando `read_policy(sections=['2'])` | sistemas além do Linux do dono (Windows e macOS não testados) |

@@ -170,7 +170,7 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
 - [x] **T-21 · Commit e push da Fase 4**
   → *Verificação:* verificação completa com saída 0; `git status` limpo; push feito.
 
-- [ ] **T-22 · Aceite manual** *(executado por: o dono)* (CA-16)
+- [x] **T-22 · Aceite manual** *(executado por: o dono)* (CA-16)
   Roteiro: `uv run emporio`; perguntar preço de um produto, um produto esgotado, o endereço; pedir
   um pedido com contato errado e depois certo; pedir algo fora do escopo; sair com Ctrl-D. Repetir
   uma pergunta com `--show-tools`. Ler os exemplos em `examples/`.
@@ -220,6 +220,6 @@ ressalva (a lacuna está no STATUS) · `[-]` descartada (motivo na linha) · `[!
   → *Verificação:* `git status` limpo; `git log origin/main -1` igual ao local; nenhum commit
   depois disso.
 
-- [ ] **T-31 · Entrega** *(executado por: o dono)*
+- [-] **T-31 · Entrega** *(executado por: o dono)* — fora da spec: o envio acontece depois do último commit, para o repositório não mudar depois de enviado
   Responder o e-mail do processo seletivo com o link do repositório público.
   → *Verificação:* o dono confirma o envio; data no LOG.

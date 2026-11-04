@@ -580,3 +580,11 @@ seguida, e nenhum arquivo do scratchpad guarda a chave (`grep` por "AIza").
 **T-29.** STATUS reescrito como resumo final, estado `implementada` (aceite do dono, CA-16,
 pendente); índice atualizado; `check_spec.py --all docs/specs` sem erro nem aviso.
 **T-30.** Commit e push deste fechamento, antes do corte das 23:30.
+
+## 2026-11-03 — Conclusão
+
+**Aceite do dono (23:41):** "pode colocar como spec concluida". Registrado como aceite da CA-16; o
+resultado de cada passo do roteiro não foi reportado. A spec passa a `concluída`. A T-31 (enviar o
+link no e-mail do processo) fica com o dono, fora do repositório, depois deste último commit; o
+corte de segurança das 23:30 já tinha passado, e este commit, só de documentação, entra antes das
+23:59.
