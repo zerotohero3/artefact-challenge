@@ -584,7 +584,7 @@ pendente); índice atualizado; `check_spec.py --all docs/specs` sem erro nem avi
 ## 2026-11-03 — Conclusão
 
 **Aceite do dono (23:41):** "pode colocar como spec concluida". Registrado como aceite da CA-16; o
-resultado de cada passo do roteiro não foi reportado. A spec passa a `concluída`. A T-31 (enviar o
+resultado de cada passo do roteiro não foi reportado. A spec passa a `concluída com ressalvas` (a T-03 segue `[~]`). A T-31 (enviar o
 link no e-mail do processo) fica com o dono, fora do repositório, depois deste último commit; o
 corte de segurança das 23:30 já tinha passado, e este commit, só de documentação, entra antes das
 23:59.
